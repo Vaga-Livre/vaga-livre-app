@@ -12,6 +12,7 @@ dependencies:
 
   cupertino_icons: ^1.0.6
   supabase_auth_ui: ^0.4.3
+  supabase_flutter: ^2.3.4
   geolocator: ^11.0.0
   flutter_config: ^2.0.2
   google_maps_flutter: ^2.6.0
@@ -26,6 +27,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/darker.png
+    - assets/images/darker_expanded.png
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

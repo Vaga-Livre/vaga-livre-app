@@ -1,4 +1,4 @@
-package com.example.vagalivre
+package br.com.vagalivre.app
 
 import io.flutter.embedding.android.FlutterActivity
 
