@@ -2,9 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:supabase_auth_ui/supabase_auth_ui.dart';
 import 'package:vagalivre/config/extension.dart';
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
+  static const completedSignUpFlag = "finishedSignUp";
+
   const LoginPage({super.key});
 
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     const spaceDefault = SizedBox.square(
@@ -13,85 +20,93 @@ class LoginPage extends StatelessWidget {
 
     return Scaffold(
       body: SafeArea(
-        child: Column(
-          children: [
-            Container(
-              color: context.colorScheme.primary,
-              height: 177,
-              child: Image.asset('assets/images/darker_expanded.png'),
-            ),
-            spaceDefault,
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Column(
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Text.rich(
-                        style: context.textTheme.headlineSmall,
-                        const TextSpan(
-                          children: [
-                            TextSpan(text: "Encontre os\n"),
-                            TextSpan(
-                              text: "melhores estacionamentos\n",
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            TextSpan(text: "perto do seu destino"),
-                          ],
-                        ),
-                      ),
-                      const SizedBox.square(
-                        dimension: 32,
-                      ),
-                      Text(
-                        "Entre agora e aproveite",
-                        style: context.textTheme.bodyLarge,
-                      )
-                    ],
-                  ),
-                  spaceDefault,
-                  Column(
-                    children: [
-                      SupaSocialsAuth(
-                        colored: true,
-                        nativeGoogleAuthConfig: const NativeGoogleAuthConfig(
-                          webClientId: 'YOUR_WEB_CLIENT_ID',
-                          iosClientId: 'YOUR_WEB_CLIENT_ID',
-                        ),
-                        enableNativeAppleAuth: true,
-                        socialProviders: const [
-                          OAuthProvider.facebook,
-                          OAuthProvider.google
-                        ],
-                        onSuccess: (session) {},
-                      ),
-                      spaceDefault
-                    ],
-                  ),
-                ],
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              Container(
+                color: context.colorScheme.primary,
+                height: 177,
+                child: Image.asset('assets/images/darker_expanded.png'),
               ),
-            ),
-            const Spacer(),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 16),
-              child: Text.rich(
-                style: context.textTheme.bodyLarge,
-                textAlign: TextAlign.center,
-                const TextSpan(children: [
-                  TextSpan(
-                      text:
-                          "Ao entrar no Vaga Livre, você concorda com os nossos "),
-                  TextSpan(
-                    text: "Termos e Política de Privacidade",
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ]),
+              spaceDefault,
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Column(
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text.rich(
+                          style: context.textTheme.headlineSmall,
+                          const TextSpan(
+                            children: [
+                              TextSpan(text: "Encontre os\n"),
+                              TextSpan(
+                                text: "melhores estacionamentos\n",
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              TextSpan(text: "perto do seu destino"),
+                            ],
+                          ),
+                        ),
+                        const SizedBox.square(
+                          dimension: 32,
+                        ),
+                        Text(
+                          "Entre agora e aproveite",
+                          style: context.textTheme.bodyLarge,
+                        )
+                      ],
+                    ),
+                    spaceDefault,
+                    Column(
+                      children: [
+                        // Create a Email sign-in/sign-up form
+                        SupaEmailAuth(
+                          onSignInComplete: (response) {
+                            checkUserMetadataAndNavigate(response, context);
+                          },
+                          onSignUpComplete: (response) {
+                            checkUserMetadataAndNavigate(response, context);
+                          },
+                        ),
+                        spaceDefault
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 48, vertical: 16),
+                child: Text.rich(
+                  style: context.textTheme.bodyLarge,
+                  textAlign: TextAlign.center,
+                  const TextSpan(children: [
+                    TextSpan(
+                        text:
+                            "Ao entrar no Vaga Livre, você concorda com os nossos "),
+                    TextSpan(
+                      text: "Termos e Política de Privacidade",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ]),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
+  }
+
+  void checkUserMetadataAndNavigate(
+      AuthResponse response, BuildContext context) {
+    Map<String, dynamic> currentUserMetadata = response.user!.appMetadata;
+    if (currentUserMetadata[LoginPage.completedSignUpFlag] == false) {
+      Navigator.pushReplacementNamed(context, 'PersonalInformation');
+    } else {
+      Navigator.pushReplacementNamed(context, '/');
+    }
   }
 }
