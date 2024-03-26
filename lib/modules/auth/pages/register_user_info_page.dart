@@ -1,10 +1,10 @@
 import 'package:brasil_fields/brasil_fields.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
-import 'package:vagalivre/config/extension.dart';
-import 'package:vagalivre/modules/auth/controller/user_info_controller.dart';
+
+import '../../../config/extension.dart';
+import '../controller/user_info_controller.dart';
 
 class RegisterUserInfoPage extends StatefulWidget {
   const RegisterUserInfoPage({super.key});

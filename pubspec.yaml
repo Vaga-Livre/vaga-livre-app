@@ -10,6 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
 
+  another_flutter_splash_screen: ^1.2.0
   cupertino_icons: ^1.0.6
   supabase_auth_ui: ^0.4.3
   supabase_flutter: ^2.3.4
