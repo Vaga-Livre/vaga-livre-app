@@ -29,7 +29,7 @@ class MyApp extends StatelessWidget {
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
       theme: MaterialTheme(ThemeData.light().textTheme).light(),
-      initialRoute: "PersonalInformation",
+      initialRoute: "/",
       routes: {
         "/": (context) => const HomePage(),
         "login": (context) => const LoginPage(),
