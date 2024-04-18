@@ -3,22 +3,23 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class MapController extends ChangeNotifier {
-  double lat = 0.0;
-  double long = 0.0;
+  double userLatitude = 0.0;
+  double userLongitude = 0.0;
   String erro = '';
-  late GoogleMapController _mapsController;
+  late GoogleMapController mapsController;
 
   onMapCreated(GoogleMapController gmc) async {
-    _mapsController = gmc;
-    getPosicao();
+    mapsController = gmc;
+    getPosition();
+    print("created");
   }
 
-  getPosicao() async {
+  void getPosition() async {
     try {
-      Position posicao = await _posicaoAtual();
-      lat = posicao.latitude;
-      long = posicao.longitude;
-      _mapsController.animateCamera(CameraUpdate.newLatLng(LatLng(lat, long)));
+      Position position = await _getCurrentUserPosition();
+      userLatitude = position.latitude;
+      userLongitude = position.longitude;
+      mapsController.animateCamera(CameraUpdate.newLatLng(LatLng(userLatitude, userLongitude)));
     } catch (e) {
       erro = e.toString();
     }
@@ -26,13 +27,13 @@ class MapController extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<Position> _posicaoAtual() async {
+  Future<Position> _getCurrentUserPosition() async {
     LocationPermission permission;
 
     bool ativado = await Geolocator.isLocationServiceEnabled();
 
     if (!ativado) {
-      return Future.error('Habilite a localizacao do seu celular');
+      return Future.error('Habilite a localização do seu celular');
     }
 
     permission = await Geolocator.checkPermission();
@@ -40,12 +41,12 @@ class MapController extends ChangeNotifier {
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
-        return Future.error('Autorize o acesso a localizacao');
+        return Future.error('Autorize o acesso a localização');
       }
     }
 
     if (permission == LocationPermission.deniedForever) {
-      return Future.error('Autorize o acesso a localizacao nas configuracoes');
+      return Future.error('Autorize o acesso a localização nas configurações');
     }
 
     return await Geolocator.getCurrentPosition();

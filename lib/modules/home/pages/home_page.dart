@@ -51,6 +51,7 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       cleanSearchText();
       isSearching = false;
+      FocusManager.instance.primaryFocus?.unfocus();
     });
   }
 
@@ -64,8 +65,7 @@ class _HomePageState extends State<HomePage> {
     debouncer.run(() {
       if (mounted) {
         setState(() {
-          searchSuggestions =
-              term.characters.map((e) => e.toUpperCase()).toList();
+          searchSuggestions = term.characters.map((e) => e.toUpperCase()).toList();
         });
       }
     });
@@ -100,8 +100,7 @@ class _HomePageState extends State<HomePage> {
                   bottomRight: Radius.circular(12),
                 ),
               ),
-              padding:
-                  const EdgeInsets.all(16) + const EdgeInsets.only(top: 56),
+              padding: const EdgeInsets.all(16) + const EdgeInsets.only(top: 56),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -178,9 +177,7 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
                     leading: isSearching
-                        ? IconButton(
-                            icon: const Icon(Icons.arrow_back),
-                            onPressed: exitSearch)
+                        ? IconButton(icon: const Icon(Icons.arrow_back), onPressed: exitSearch)
                         : null,
                     title: TextField(
                       controller: searchController,
@@ -214,9 +211,7 @@ class _HomePageState extends State<HomePage> {
                         child: Container(
                           decoration: ShapeDecoration(
                             color: ElevationOverlay.colorWithOverlay(
-                                colorScheme.surface,
-                                colorScheme.surfaceTint,
-                                2),
+                                colorScheme.surface, colorScheme.surfaceTint, 2),
                             shape: const RoundedRectangleBorder(
                               borderRadius: BorderRadius.vertical(
                                 top: Radius.zero,

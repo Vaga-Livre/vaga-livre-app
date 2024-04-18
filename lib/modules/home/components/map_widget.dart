@@ -12,16 +12,19 @@ class MapWidget extends StatelessWidget {
         final local = context.watch<MapController>();
 
         return GoogleMap(
+          onTap: print,
+          onLongPress: print,
+          onCameraMove: print,
+          onMapCreated: local.onMapCreated,
+          compassEnabled: true,
+          myLocationEnabled: true,
+          mapToolbarEnabled: true,
+          zoomGesturesEnabled: true,
+          padding: const EdgeInsets.only(top: 156),
           initialCameraPosition: CameraPosition(
-            target: LatLng(local.lat, local.long),
+            target: LatLng(local.userLatitude, local.userLongitude),
             zoom: 18,
           ),
-          zoomControlsEnabled: true,
-          zoomGesturesEnabled: true,
-          mapType: MapType.normal,
-          myLocationEnabled: true,
-          myLocationButtonEnabled: true,
-          onMapCreated: local.onMapCreated,
         );
       }),
     );
