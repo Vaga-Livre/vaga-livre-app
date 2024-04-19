@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 
-import '../../parks/controllers/ParksSearchController.dart';
+import '../../parks/controllers/parks_search_controller.dart';
 import '../controller/map_controller.dart';
 
 class MapWidget extends StatelessWidget {

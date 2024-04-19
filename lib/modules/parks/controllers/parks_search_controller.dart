@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:vagalivre/utils/debouncer.dart';
+
+import '../../../utils/debouncer.dart';
 
 class SearchResult {
   final LatLng location;
@@ -13,7 +14,7 @@ class SearchResult {
 }
 
 class ParksSearchController extends ChangeNotifier {
-  Debouncer debouncer = Debouncer(delay: const Duration(milliseconds: 500));
+  Debouncer debouncer = Debouncer(delay: const Duration(seconds: 1));
 
   bool isSearching = false;
   List<SearchResult> searchSuggestions = [];
@@ -21,7 +22,6 @@ class ParksSearchController extends ChangeNotifier {
 
   final FocusNode searchInputFocusNode;
   final TextEditingController queryTextController;
-
 
   ParksSearchController({required this.searchInputFocusNode, required this.queryTextController}) {
     queryTextController.addListener(() => searchRecommendations());
@@ -65,16 +65,17 @@ class ParksSearchController extends ChangeNotifier {
       notifyListeners();
     }
 
-    debouncer.run(() {
-      // TODO: Do the request here
-      searchSuggestions = [
-        SearchResult("Ideal", const LatLng(-5.160009, -42.785307)),
-        SearchResult("Sacolão", const LatLng(-5.160096, -42.787671)),
-        SearchResult("Junekinho Produções", const LatLng(-5.16278689, -42.78500430)),
-      ];
+    if (queryTextController.text.isNotEmpty)
+      debouncer.run(() {
+        // TODO: Do the request here
+        searchSuggestions = [
+          SearchResult("Ideal", const LatLng(-5.160009, -42.785307)),
+          SearchResult("Sacolão", const LatLng(-5.160096, -42.787671)),
+          SearchResult("Junekinho Produções", const LatLng(-5.16278689, -42.78500430)),
+        ];
 
-      notifyListeners();
-    });
+        notifyListeners();
+      });
   }
 
   selectTerm(SearchResult term) {

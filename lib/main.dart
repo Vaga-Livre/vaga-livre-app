@@ -7,7 +7,7 @@ import 'package:supabase_auth_ui/supabase_auth_ui.dart';
 import 'modules/auth/pages/login_page.dart';
 import 'modules/auth/pages/register_user_info_page.dart';
 import 'modules/home/pages/home_page.dart';
-import 'modules/parks/controllers/ParksSearchController.dart';
+import 'modules/parks/controllers/parks_search_controller.dart';
 import 'theme.dart';
 
 void main() async {

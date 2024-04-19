@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../parks/controllers/ParksSearchController.dart';
+import '../../parks/controllers/parks_search_controller.dart';
 
 class AppSearchBar extends StatefulWidget {
   const AppSearchBar({super.key});

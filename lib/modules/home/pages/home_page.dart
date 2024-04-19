@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../components/app_bottom_sheet.dart';
 import '../components/map_widget.dart';
 import '../components/search_bar.dart';
 import '../components/search_header.dart';
@@ -20,6 +21,8 @@ class HomePage extends StatelessWidget {
           ],
         ),
       ),
+      bottomSheet:
+          BottomSheet(onClosing: () {}, elevation: 0, builder: (context) => const AppBottomSheet()),
       bottomNavigationBar: NavigationBar(
         elevation: 0,
         destinations: const [
