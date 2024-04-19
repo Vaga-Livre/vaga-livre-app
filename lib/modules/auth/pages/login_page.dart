@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_auth_ui/supabase_auth_ui.dart';
-import 'package:vagalivre/config/extension.dart';
+
+import '../../../config/extension.dart';
 
 class LoginPage extends StatefulWidget {
   static const completedSignUpFlag = "finishedSignUp";
@@ -77,15 +78,12 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
               Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 48, vertical: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 16),
                 child: Text.rich(
                   style: context.textTheme.bodyLarge,
                   textAlign: TextAlign.center,
                   const TextSpan(children: [
-                    TextSpan(
-                        text:
-                            "Ao entrar no Vaga Livre, você concorda com os nossos "),
+                    TextSpan(text: "Ao entrar no Vaga Livre, você concorda com os nossos "),
                     TextSpan(
                       text: "Termos e Política de Privacidade",
                       style: TextStyle(fontWeight: FontWeight.bold),
@@ -100,8 +98,7 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  void checkUserMetadataAndNavigate(
-      AuthResponse response, BuildContext context) {
+  void checkUserMetadataAndNavigate(AuthResponse response, BuildContext context) {
     Map<String, dynamic> currentUserMetadata = response.user!.appMetadata;
     if (currentUserMetadata[LoginPage.completedSignUpFlag] == false) {
       Navigator.pushReplacementNamed(context, 'PersonalInformation');

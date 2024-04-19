@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
-import 'package:vagalivre/modules/home/controller/map_controller.dart';
+
+import '../../parks/controllers/ParksSearchController.dart';
+import '../controller/map_controller.dart';
 
 class MapWidget extends StatelessWidget {
   @override
@@ -9,20 +11,30 @@ class MapWidget extends StatelessWidget {
     return ChangeNotifierProvider<MapController>(
       create: (context) => MapController(),
       child: Builder(builder: (context) {
-        final local = context.watch<MapController>();
-
+        final mapController = context.watch<MapController>();
+        final searchController = context.watch<ParksSearchController>();
+        print(searchController.results);
         return GoogleMap(
-          onTap: print,
-          onLongPress: print,
-          onCameraMove: print,
-          onMapCreated: local.onMapCreated,
+          // onTap: print,
+          // onLongPress: print,
+          // onCameraMove: print,
+          onMapCreated: mapController.onMapCreated,
           compassEnabled: true,
           myLocationEnabled: true,
           mapToolbarEnabled: true,
           zoomGesturesEnabled: true,
           padding: const EdgeInsets.only(top: 156),
+          markers: searchController.results
+                  ?.map((e) => Marker(
+                        markerId: MarkerId(e.label),
+                        onTap: () => searchController.selectTerm(e),
+                        visible: true,
+                        position: e.location,
+                      ))
+                  .toSet() ??
+              {},
           initialCameraPosition: CameraPosition(
-            target: LatLng(local.userLatitude, local.userLongitude),
+            target: LatLng(mapController.userLatitude, mapController.userLongitude),
             zoom: 18,
           ),
         );
