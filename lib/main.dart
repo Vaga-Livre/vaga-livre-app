@@ -8,6 +8,7 @@ import 'package:supabase_auth_ui/supabase_auth_ui.dart';
 import 'modules/auth/pages/login_page.dart';
 import 'modules/auth/pages/register_user_info_page.dart';
 import 'modules/home/pages/home_page.dart';
+import 'modules/home/pages/search_results_page.dart';
 import 'modules/parks/controllers/parks_search_controller.dart';
 import 'theme.dart';
 
@@ -47,6 +48,12 @@ final _router = GoRouter(initialLocation: "/", routes: [
     path: "/",
     name: "home",
     builder: (_, __) => const HomePage(),
+    routes: [
+      GoRoute(
+          path: "search-results",
+          name: "search-results",
+          builder: (context, _) => SearchResultsPage.builder(context))
+    ],
   ),
   GoRoute(path: "/user/history", name: "history", builder: (_, state) => Container()),
   GoRoute(path: "/park/:id", name: "park-info", builder: (_, state) => Container()),

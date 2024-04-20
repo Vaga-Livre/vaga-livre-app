@@ -7,7 +7,7 @@ class SearchResult {
   final LatLng location;
   final String label;
 
-  SearchResult(
+  const SearchResult(
     this.label,
     this.location,
   );
@@ -47,7 +47,6 @@ class ParksSearchController extends ChangeNotifier {
   }
 
   void searchCurrentQuery() async {
-    print("Submmited");
     searchRecommendations();
 
     await Future.delayed(debouncer.delay + Durations.short4);
@@ -65,17 +64,18 @@ class ParksSearchController extends ChangeNotifier {
       notifyListeners();
     }
 
-    if (queryTextController.text.isNotEmpty)
+    if (queryTextController.text.isNotEmpty) {
       debouncer.run(() {
         // TODO: Do the request here
-        searchSuggestions = [
-          SearchResult("Ideal", const LatLng(-5.160009, -42.785307)),
-          SearchResult("Sacolão", const LatLng(-5.160096, -42.787671)),
-          SearchResult("Junekinho Produções", const LatLng(-5.16278689, -42.78500430)),
+        searchSuggestions = const [
+          SearchResult("Ideal", LatLng(-5.160009, -42.785307)),
+          SearchResult("Sacolão", LatLng(-5.160096, -42.787671)),
+          SearchResult("Junekinho Produções", LatLng(-5.16278689, -42.78500430)),
         ];
 
         notifyListeners();
       });
+    }
   }
 
   selectTerm(SearchResult term) {

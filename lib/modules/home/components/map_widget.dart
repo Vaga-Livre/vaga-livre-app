@@ -24,6 +24,7 @@ class MapWidget extends StatelessWidget {
           mapToolbarEnabled: true,
           zoomGesturesEnabled: true,
           padding: const EdgeInsets.only(top: 156),
+          // TODO: Enhance markers: Implement tap callbacks, label, content, color, number of free slots
           markers: searchController.results
                   ?.map((e) => Marker(
                         markerId: MarkerId(e.label),

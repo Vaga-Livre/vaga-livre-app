@@ -13,7 +13,7 @@ class UserInfo with ChangeNotifier {
     dateController.addListener(notifyListeners);
   }
 
-  void changeUserInfo() async {
+  Future<void> changeUserInfo() async {
     final res = await Supabase.instance.client.auth.updateUser(
       UserAttributes(
         data: {
