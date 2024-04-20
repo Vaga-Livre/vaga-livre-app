@@ -1,10 +1,11 @@
 import 'package:brasil_fields/brasil_fields.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:vagalivre/config/extension.dart';
-import 'package:vagalivre/modules/auth/controller/user_info_controller.dart';
+
+import '../../../config/extension.dart';
+import '../controller/user_info_controller.dart';
 
 class RegisterUserInfoPage extends StatefulWidget {
   const RegisterUserInfoPage({super.key});
@@ -68,8 +69,7 @@ class _RegisterUserInfoPageState extends State<RegisterUserInfoPage> {
                           ),
                           spaceDefault,
                           TextFormField(
-                            controller:
-                                userInfoController.phoneNumberController,
+                            controller: userInfoController.phoneNumberController,
                             decoration: InputDecoration(
                               label: const Text("Telefone"),
                               prefixIcon: const Icon(Icons.call_outlined),
@@ -92,29 +92,21 @@ class _RegisterUserInfoPageState extends State<RegisterUserInfoPage> {
                                 children: [
                                   Container(
                                     decoration: BoxDecoration(
-                                      border: Border.all(
-                                          color: Color.fromARGB(
-                                              255, 107, 106, 106)),
+                                      border: Border.all(color: Color.fromARGB(255, 107, 106, 106)),
                                       borderRadius: BorderRadius.circular(10),
                                     ),
                                     child: ListTile(
-                                      leading:
-                                          const Icon(Icons.date_range_outlined),
+                                      leading: const Icon(Icons.date_range_outlined),
                                       contentPadding:
-                                          const EdgeInsets.symmetric(
-                                              horizontal: 13, vertical: 3),
+                                          const EdgeInsets.symmetric(horizontal: 13, vertical: 3),
                                       title: const Text("Data de Nascimento"),
                                       trailing: Text(
-                                        userInfoController
-                                                .dateController.text.isNotEmpty
-                                            ? DateFormat.yMMMMd('pt_Br').format(
-                                                DateTime.parse(
-                                                    userInfoController
-                                                        .dateController.text))
+                                        userInfoController.dateController.text.isNotEmpty
+                                            ? DateFormat.yMMMMd('pt_Br').format(DateTime.parse(
+                                                userInfoController.dateController.text))
                                             : 'Selecione uma data',
                                       ),
-                                      leadingAndTrailingTextStyle:
-                                          context.textTheme.labelLarge,
+                                      leadingAndTrailingTextStyle: context.textTheme.labelLarge,
                                       onTap: () async {
                                         final dateTime = await showDatePicker(
                                           context: context,
@@ -122,31 +114,24 @@ class _RegisterUserInfoPageState extends State<RegisterUserInfoPage> {
                                           lastDate: DateTime.now(),
                                         );
                                         if (dateTime != null) {
-                                          userInfoController
-                                                  .dateController.text =
+                                          userInfoController.dateController.text =
                                               dateTime.toIso8601String();
                                         }
                                       },
                                     ),
                                   ),
-                                  if (userInfoController
-                                          .dateController.text.isNotEmpty &&
+                                  if (userInfoController.dateController.text.isNotEmpty &&
                                       userInfoController.validateAge(
-                                              userInfoController
-                                                  .dateController.text) !=
+                                              userInfoController.dateController.text) !=
                                           null)
                                     Padding(
-                                      padding: const EdgeInsets.only(
-                                          left: 15, top: 8),
+                                      padding: const EdgeInsets.only(left: 15, top: 8),
                                       child: Text(
                                         userInfoController.validateAge(
-                                                userInfoController
-                                                    .dateController.text) ??
+                                                userInfoController.dateController.text) ??
                                             '',
                                         style: context.textTheme.bodySmall
-                                            ?.copyWith(
-                                                color:
-                                                    context.colorScheme.error),
+                                            ?.copyWith(color: context.colorScheme.error),
                                       ),
                                     ),
                                 ],
@@ -155,9 +140,13 @@ class _RegisterUserInfoPageState extends State<RegisterUserInfoPage> {
                           ),
                           const SizedBox(height: 32),
                           FilledButton(
-                            onPressed: () {
+                            onPressed: () async {
                               if (_formKey.currentState!.validate()) {
-                                userInfoController.changeUserInfo();
+                                await userInfoController.changeUserInfo();
+
+                                if (context.mounted) {
+                                  context.go("/");
+                                }
                               }
                             },
                             child: const Text("Continuar"),

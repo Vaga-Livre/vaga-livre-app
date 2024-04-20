@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../../config/extension.dart';
@@ -52,7 +53,9 @@ class AppBottomSheet extends StatelessWidget {
                 ),
               ),
               TextButton(
-                onPressed: () {},
+                onPressed: () {
+                  context.go("/search-results");
+                },
                 child: const Center(child: Text("Ver lista completa")),
               )
             ],

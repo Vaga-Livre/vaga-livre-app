@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_config/flutter_config.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_auth_ui/supabase_auth_ui.dart';
@@ -31,17 +32,24 @@ class MyApp extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (_) => ParksSearchController(
           queryTextController: TextEditingController(text: ""), searchInputFocusNode: FocusNode()),
-      child: MaterialApp(
+      child: MaterialApp.router(
+        routerConfig: _router,
         title: 'Flutter Demo',
         debugShowCheckedModeBanner: false,
         theme: MaterialTheme(ThemeData.light().textTheme).light(),
-        initialRoute: "/",
-        routes: {
-          "/": (context) => const HomePage(),
-          "login": (context) => const LoginPage(),
-          "PersonalInformation": (context) => RegisterUserInfoPage(),
-        },
       ),
     );
   }
 }
+
+final _router = GoRouter(initialLocation: "/", routes: [
+  GoRoute(
+    path: "/",
+    name: "home",
+    builder: (_, __) => const HomePage(),
+  ),
+  GoRoute(path: "/user/history", name: "history", builder: (_, state) => Container()),
+  GoRoute(path: "/park/:id", name: "park-info", builder: (_, state) => Container()),
+  GoRoute(path: "/login", builder: (_, __) => const LoginPage()),
+  GoRoute(path: "/user-info", builder: (_, __) => const RegisterUserInfoPage()),
+]);

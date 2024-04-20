@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:supabase_auth_ui/supabase_auth_ui.dart';
 
 import '../../../config/extension.dart';
@@ -101,9 +102,9 @@ class _LoginPageState extends State<LoginPage> {
   void checkUserMetadataAndNavigate(AuthResponse response, BuildContext context) {
     Map<String, dynamic> currentUserMetadata = response.user!.appMetadata;
     if (currentUserMetadata[LoginPage.completedSignUpFlag] == false) {
-      Navigator.pushReplacementNamed(context, 'PersonalInformation');
+      context.go('/user-info');
     } else {
-      Navigator.pushReplacementNamed(context, '/');
+      context.go('/');
     }
   }
 }
