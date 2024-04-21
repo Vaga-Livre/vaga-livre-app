@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:vagalivre/utils/formatters.dart';
 
+import '../../../utils/initial_letters.dart';
 import '../../parks/controllers/parks_search_controller.dart';
 
 class SearchResultsPage extends StatelessWidget {
@@ -35,7 +37,7 @@ class SearchResultsPage extends StatelessWidget {
               child: Text("Nenhum resultado disponível"),
             )
           : ListView.separated(
-              separatorBuilder: (context, index) => Divider(height: 0),
+              separatorBuilder: (context, index) => const Divider(height: 0),
               itemCount: controller.results!.length,
               itemBuilder: (context, index) {
                 final item = controller.results![index];
@@ -45,13 +47,13 @@ class SearchResultsPage extends StatelessWidget {
                   subtitle: Text(item.label),
                   isThreeLine: false,
                   leading: CircleAvatar(
-                    child: Text(String.fromCharCode(item.label.runes.first).toUpperCase()),
+                    child: Text(initialLetters(item.label)),
                   ),
-                  trailing: const Row(
+                  trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(r"R$ 6,00 por hora"),
-                      Icon(Icons.arrow_right),
+                      Text("R\$ ${currencyFormatter.format(item.price)}/hora"),
+                      const Icon(Icons.arrow_right),
                     ],
                   ),
                   onTap: () => context.push("/park/${item.label}"),

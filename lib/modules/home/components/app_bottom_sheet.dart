@@ -3,10 +3,12 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../../config/extension.dart';
+import '../../../utils/formatters.dart';
+import '../../../utils/initial_letters.dart';
 import '../../parks/controllers/parks_search_controller.dart';
 
 class AppBottomSheet extends StatelessWidget {
-  const AppBottomSheet({super.key});
+  AppBottomSheet({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +16,7 @@ class AppBottomSheet extends StatelessWidget {
 
     if (_searchController.results?.isNotEmpty == true) {
       final results = _searchController.results!;
-      final plural = results.length > 1;
+      final pluralResults = results.length > 1;
 
       return SizedBox(
         width: double.maxFinite,
@@ -27,29 +29,80 @@ class AppBottomSheet extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(bottom: 8),
                 child: Text(
-                  "${results.length} ${plural ? "estacionamentos" : "estacionamento"} perto",
+                  "${results.length} ${pluralResults ? "estacionamentos" : "estacionamento"} perto",
                   style: context.textTheme.titleLarge,
                 ),
               ),
               SingleChildScrollView(
                 clipBehavior: Clip.none,
                 scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: results
-                      .map(
-                        (e) => Card(
-                          margin: const EdgeInsets.only(right: 10),
+                child: IntrinsicHeight(
+                  child: Row(
+                    children: results.map(
+                      (park) {
+                        final pluralSlots = park.slotsCount != 1;
+
+                        return Card(
                           elevation: 2,
-                          child: SizedBox(
-                            height: 100,
-                            width: 200,
-                            child: Center(
-                              child: Text(e.label),
+                          surfaceTintColor: Colors.transparent,
+                          color: context.colorScheme.onPrimary,
+                          margin: const EdgeInsets.only(right: 10),
+                          child: Container(
+                            width: 250,
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    CircleAvatar(
+                                      child: Text(
+                                        initialLetters(
+                                          park.label,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox.square(dimension: 8),
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          park.label,
+                                          style: context.textTheme.titleMedium,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        Row(
+                                          children: [
+                                            const Icon(Icons.pentagon, size: 14),
+                                            const SizedBox.square(dimension: 4),
+                                            Text(park.address, style: context.textTheme.bodySmall),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox.square(dimension: 6),
+                                Text("R\$ ${currencyFormatter.format(park.price)}/hora"),
+                                Text(
+                                  "${park.slotsCount} "
+                                  "${pluralSlots ? "espaços" : "espaço"} "
+                                  "${pluralSlots ? "disponíveis" : "disponível"}",
+                                ),
+                                const Divider(height: 8),
+                                Text(
+                                  park.description,
+                                  maxLines: 3,
+                                  overflow: TextOverflow.fade,
+                                )
+                              ],
                             ),
                           ),
-                        ),
-                      )
-                      .toList(),
+                        );
+                      },
+                    ).toList(),
+                  ),
                 ),
               ),
               TextButton(

@@ -22,7 +22,7 @@ class HomePage extends StatelessWidget {
         ),
       ),
       bottomSheet:
-          BottomSheet(onClosing: () {}, elevation: 0, builder: (context) => const AppBottomSheet()),
+          BottomSheet(onClosing: () {}, elevation: 0, builder: (context) =>  AppBottomSheet()),
       bottomNavigationBar: NavigationBar(
         elevation: 0,
         destinations: const [
