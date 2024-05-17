@@ -6,6 +6,7 @@ import '../../../config/extension.dart';
 import '../../../utils/formatters.dart';
 import '../../../utils/initial_letters.dart';
 import '../../parks/controllers/parks_search_controller.dart';
+import '../controller/map_controller.dart';
 
 class AppBottomSheet extends StatelessWidget {
   AppBottomSheet({super.key});
@@ -47,56 +48,60 @@ class AppBottomSheet extends StatelessWidget {
                           surfaceTintColor: Colors.transparent,
                           color: context.colorScheme.onPrimary,
                           margin: const EdgeInsets.only(right: 10),
-                          child: Container(
-                            width: 250,
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    CircleAvatar(
-                                      child: Text(
-                                        initialLetters(
-                                          park.label,
+                          child: InkWell(
+                            onTap: () {
+                              context.read<MapController>().focusOn(park.location);
+                            },
+                            child: Container(
+                              width: 350,
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      CircleAvatar(
+                                        child: Text(
+                                          initialLetters(park.label),
                                         ),
                                       ),
-                                    ),
-                                    const SizedBox.square(dimension: 8),
-                                    Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          park.label,
-                                          style: context.textTheme.titleMedium,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                        Row(
-                                          children: [
-                                            const Icon(Icons.pentagon, size: 14),
-                                            const SizedBox.square(dimension: 4),
-                                            Text(park.address, style: context.textTheme.bodySmall),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox.square(dimension: 6),
-                                Text("R\$ ${currencyFormatter.format(park.price)}/hora"),
-                                Text(
-                                  "${park.slotsCount} "
-                                  "${pluralSlots ? "espaços" : "espaço"} "
-                                  "${pluralSlots ? "disponíveis" : "disponível"}",
-                                ),
-                                const Divider(height: 8),
-                                Text(
-                                  park.description,
-                                  maxLines: 3,
-                                  overflow: TextOverflow.fade,
-                                )
-                              ],
+                                      const SizedBox.square(dimension: 8),
+                                      Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            park.label,
+                                            style: context.textTheme.titleMedium,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          Row(
+                                            children: [
+                                              const Icon(Icons.pentagon, size: 14),
+                                              const SizedBox.square(dimension: 4),
+                                              Text(park.address,
+                                                  style: context.textTheme.bodySmall),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox.square(dimension: 6),
+                                  Text("R\$ ${currencyFormatter.format(park.price)}/hora"),
+                                  Text(
+                                    "${park.slotsCount} "
+                                    "${pluralSlots ? "espaços" : "espaço"} "
+                                    "${pluralSlots ? "disponíveis" : "disponível"}",
+                                  ),
+                                  const Divider(height: 8),
+                                  Text(
+                                    park.description,
+                                    maxLines: 3,
+                                    overflow: TextOverflow.fade,
+                                  )
+                                ],
+                              ),
                             ),
                           ),
                         );

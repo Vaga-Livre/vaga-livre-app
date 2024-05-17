@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_auth_ui/supabase_auth_ui.dart';
+import 'package:vagalivre/modules/home/controller/map_controller.dart';
 
 import 'modules/auth/pages/login_page.dart';
 import 'modules/auth/pages/register_user_info_page.dart';
@@ -30,14 +31,19 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => ParksSearchController(
-          queryTextController: TextEditingController(text: ""), searchInputFocusNode: FocusNode()),
-      child: MaterialApp.router(
-        routerConfig: _router,
-        title: 'Flutter Demo',
-        debugShowCheckedModeBanner: false,
-        theme: MaterialTheme(ThemeData.light().textTheme).light(),
+    return ChangeNotifierProvider<MapController>(
+      create: (_) => MapController(),
+      child: ChangeNotifierProvider(
+        create: (context) => ParksSearchController(
+            queryTextController: TextEditingController(text: ""),
+            searchInputFocusNode: FocusNode(),
+            mapController: context.read<MapController>()),
+        child: MaterialApp.router(
+          routerConfig: _router,
+          title: 'Flutter Demo',
+          debugShowCheckedModeBanner: false,
+          theme: MaterialTheme(ThemeData.light().textTheme).light(),
+        ),
       ),
     );
   }

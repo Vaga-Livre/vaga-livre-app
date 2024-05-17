@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../config/extension.dart';
 import '../components/app_bottom_sheet.dart';
 import '../components/map_widget.dart';
 import '../components/search_bar.dart';
@@ -22,9 +24,35 @@ class HomePage extends StatelessWidget {
         ),
       ),
       bottomSheet:
-          BottomSheet(onClosing: () {}, elevation: 0, builder: (context) =>  AppBottomSheet()),
+          BottomSheet(onClosing: () {}, elevation: 0, builder: (context) => AppBottomSheet()),
       bottomNavigationBar: NavigationBar(
         elevation: 0,
+        onDestinationSelected: (value) async {
+          switch (value) {
+            case 2:
+              showAdaptiveDialog(
+                context: context,
+                builder: (context) => AlertDialog.adaptive(
+                  title: const Text("Deseja Sair?"),
+                  content: const Text("Tem certeza que deseja sair?"),
+                  actions: [
+                    TextButton(
+                      onPressed: () => context.pop(),
+                      child: const Text('cancelar'),
+                    ),
+                    TextButton(
+                      style: TextButton.styleFrom(foregroundColor: context.colorScheme.error),
+                      onPressed: () => context.go("/login"),
+                      child: const Text('Sair mesmo assim'),
+                    ),
+                  ],
+                ),
+              );
+              break;
+            default:
+              break;
+          }
+        },
         destinations: const [
           NavigationDestination(
             icon: Icon(Icons.directions_car),
@@ -35,8 +63,8 @@ class HomePage extends StatelessWidget {
             label: "Reservas",
           ),
           NavigationDestination(
-            icon: Icon(Icons.settings),
-            label: "Opções",
+            icon: Icon(Icons.logout),
+            label: "Sair",
           ),
         ],
       ),

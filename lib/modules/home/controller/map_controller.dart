@@ -17,14 +17,20 @@ class MapController extends ChangeNotifier {
   void getPosition() async {
     try {
       Position position = await _getCurrentUserPosition();
+
       userLatitude = position.latitude;
       userLongitude = position.longitude;
-      mapsController.animateCamera(CameraUpdate.newLatLng(LatLng(userLatitude, userLongitude)));
+
+      focusOn(LatLng(userLatitude, userLongitude));
     } catch (e) {
       erro = e.toString();
     }
 
     notifyListeners();
+  }
+
+  void focusOn(LatLng local) {
+    mapsController.animateCamera(CameraUpdate.newLatLng(local));
   }
 
   Future<Position> _getCurrentUserPosition() async {
