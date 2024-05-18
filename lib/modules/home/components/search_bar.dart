@@ -80,7 +80,7 @@ class _AppSearchBarState extends State<AppSearchBar> {
                         final term = _searchController.searchSuggestions[i ~/ 2];
                         return ListTile(
                           title: Text(term.label),
-                          onTap: () => _searchController.selectTerm(term),
+                          // onTap: () => _searchController.selectTerm(term),
                           dense: true,
                         );
                       } else {

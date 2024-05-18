@@ -1,26 +1,34 @@
-import 'dart:developer';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:http/http.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../utils/debouncer.dart';
+import '../../../utils/cached_http_client.dart';
+import '../../../utils/object_box.dart';
 import '../../../utils/typedefs.dart';
 import '../../home/controller/map_controller.dart';
 
-class SearchResult {
+class AddressSearchResult {
   final String label;
   final String address;
-  final String description;
   final LatLng location;
+
+  const AddressSearchResult({required this.label, required this.address, required this.location});
+}
+
+class SearchResult extends AddressSearchResult {
+  final String description;
   final int slotsCount;
   final double price;
 
   const SearchResult({
-    required this.label,
-    required this.address,
+    required super.label,
+    required super.address,
+    required super.location,
     required this.description,
-    required this.location,
     required this.slotsCount,
     required this.price,
   });
@@ -29,14 +37,17 @@ class SearchResult {
 class ParksSearchController extends ChangeNotifier {
   final MapController mapController;
 
-  Debouncer debouncer = Debouncer(delay: const Duration(seconds: 1));
+  Debouncer debouncer = Debouncer(delay: const Duration(milliseconds: 500));
 
   bool isSearching = false;
-  List<SearchResult> searchSuggestions = [];
+  List<AddressSearchResult> searchSuggestions = [];
   List<SearchResult>? results = [];
 
   final FocusNode searchInputFocusNode;
   final TextEditingController queryTextController;
+
+  final _httpClient = CachedHttpClient(Client(), ObjectBox.store);
+  final _supabaseClient = Supabase.instance.client;
 
   ParksSearchController(
       {required this.searchInputFocusNode,
@@ -64,36 +75,33 @@ class ParksSearchController extends ChangeNotifier {
     notifyListeners();
   }
 
-  void searchCurrentQuery() async {
-    searchRecommendations();
+  Future<void> searchCurrentQuery() async {
+    if (debouncer.isRunning) await debouncer.future;
 
-    await Future.delayed(debouncer.delay + Durations.short4);
-
-    results = searchSuggestions;
+    results = searchSuggestions.whereType<SearchResult>().toList();
     isSearching = false;
 
     notifyListeners();
   }
 
-  void searchRecommendations() {
+  Future<void> searchRecommendations() async {
     if (!isSearching) {
       isSearching = true;
 
       notifyListeners();
     }
 
-    if (queryTextController.text.isNotEmpty) {
-      debouncer.run(() async {
-        final supaClient = Supabase.instance.client;
+    if (queryTextController.text.isEmpty) {
+      return;
+    }
 
-        final terms = queryTextController.text.splitMapJoin(
-          RegExp(r"[ ,\.]"),
-          onMatch: (match) => " | ",
-          onNonMatch: (match) => "$match:*",
-        );
+    await debouncer.run(() async {
+      final query = queryTextController.text.trim();
+      final terms = _toSearchTsQuery(query);
 
-        final supaFuture = supaClient.from("park").select().textSearch("name", terms);
-        final List<JsonType> resultsData = await supaFuture;
+      searchParks() async {
+        final List<JsonType> resultsData =
+            await _supabaseClient.from("park").select().textSearch("name", terms);
 
         final data = resultsData.map((e) => SearchResult(
               label: e["name"],
@@ -104,26 +112,77 @@ class ParksSearchController extends ChangeNotifier {
               price: (e["hourly_rate"] as num).toDouble(),
             ));
 
-        searchSuggestions = data.toList();
+        return data.toList();
+      }
 
-        notifyListeners();
-      });
-    }
+      searchAddresses() async {
+        final uri = Uri.https(
+          'nominatim.openstreetmap.org',
+          '/search.php',
+          {
+            'countrycodes': 'br',
+            'format': 'jsonv2',
+            'limit': '20',
+            'q': query,
+          },
+        );
+
+        final response = await _httpClient.get(uri);
+
+        final addressesData = json.decode(response.body);
+
+        if (response.statusCode == 200) {
+          return (addressesData as List)
+              .map((map) => AddressSearchResult(
+                    label: map['name'],
+                    address: "",
+                    location: LatLng(double.parse(map["lat"]), double.parse(map["lon"])),
+                  ))
+              .toList();
+        } else {
+          throw Exception(
+              "Ocorreu um erro ao buscar endereços: ${addressesData["error"]["message"]}");
+        }
+      }
+
+      // nome pra listar os endereços: Destinos
+
+      final [parks, addresses] = await Future.wait<List<AddressSearchResult>>([
+        searchParks(),
+        searchAddresses(),
+      ]);
+
+      searchSuggestions = [...parks, ...addresses];
+
+      notifyListeners();
+    });
   }
 
-  selectTerm(SearchResult term) {
-    results = [term];
-    searchInputFocusNode.unfocus();
-    queryTextController.text = term.label;
-    isSearching = false;
+  _toSearchTsQuery(String query) => query.splitMapJoin(
+        RegExp(r"[ ,\.]"),
+        onMatch: (match) => " | ",
+        onNonMatch: (match) => "$match:*",
+      );
 
-    // mapController.focusOn(results)
+  // selectTerm(SearchResult term) {
+  //   results = [term];
+  //   searchInputFocusNode.unfocus();
+  //   queryTextController.text = term.label;
+  //   isSearching = false;
 
-    notifyListeners();
-  }
+  //   // mapController.focusOn(results)
+
+  //   notifyListeners();
+  // }
 
   void _cleanSearchText() {
     queryTextController.text = "";
     searchSuggestions = [];
+  }
+
+  @override
+  void dispose() {
+    debouncer.dispose();
+    super.dispose();
   }
 }

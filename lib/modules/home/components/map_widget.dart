@@ -26,7 +26,7 @@ class MapWidget extends StatelessWidget {
         markers: searchController.results
                 ?.map((e) => Marker(
                       markerId: MarkerId(e.label),
-                      onTap: () => searchController.selectTerm(e),
+                      // onTap: () => searchController.selectTerm(e),
                       visible: true,
                       position: e.location,
                     ))
