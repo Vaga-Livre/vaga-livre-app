@@ -4,14 +4,15 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_auth_ui/supabase_auth_ui.dart';
-import 'package:vagalivre/modules/home/controller/map_controller.dart';
 
 import 'modules/auth/pages/login_page.dart';
 import 'modules/auth/pages/register_user_info_page.dart';
+import 'modules/home/controller/map_controller.dart';
 import 'modules/home/pages/home_page.dart';
 import 'modules/home/pages/search_results_page.dart';
 import 'modules/parks/controllers/parks_search_controller.dart';
 import 'theme.dart';
+import 'utils/object_box.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,6 +24,8 @@ void main() async {
     anonKey: FlutterConfig.get('PUBLIC_SUPABASE_ANON_KEY'),
   );
 
+  await ObjectBox.initialize();
+
   runApp(const MyApp());
 }
 
@@ -33,6 +36,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<MapController>(
       create: (_) => MapController(),
+      lazy: false,
       child: ChangeNotifierProvider(
         create: (context) => ParksSearchController(
             queryTextController: TextEditingController(text: ""),
