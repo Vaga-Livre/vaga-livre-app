@@ -1,10 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:developer';
 import 'dart:typed_data';
 
 import 'package:http/http.dart';
-import 'package:objectbox/objectbox.dart';
 import 'package:vagalivre/objectbox.g.dart';
 
 class CachedHttpClient {
@@ -13,9 +11,31 @@ class CachedHttpClient {
 
   CachedHttpClient(this._client, this._objBoxStore);
 
-  Future<Response> get(Uri url, {Map<String, String>? headers}) async {
+  Future<Response> get(Uri uri, {Map<String, String> headers = const {}}) async {
+    return send(Request("GET", uri)..headers.addAll(headers), true);
+  }
+
+  Future<Response> post(Uri uri, {Map<String, String> headers = const {}, Object? body}) async {
+    final request = Request("POST", uri);
+
+    request.headers.addAll(headers);
+
+    switch (body) {
+      case List():
+        request.bodyBytes = body as List<int>;
+      case Map():
+        request.bodyBytes = utf8.encode(jsonEncode(body));
+        request.headers.putIfAbsent('content-type', () => 'application/json');
+      case String():
+        request.body = body;
+    }
+
+    return send(request, true);
+  }
+
+  Future<Response> send(BaseRequest request, bool useCache) async {
     final box = _objBoxStore.box<CachedHttpResponse>();
-    final cacheQuery = box.query(CachedHttpResponse_.url.equals(url.toString())).build();
+    final cacheQuery = box.query(CachedHttpResponse_.url.equals(request.url.toString())).build();
 
     final cachedResponse = cacheQuery.findUnique();
     if (cachedResponse != null) {
@@ -25,14 +45,14 @@ class CachedHttpClient {
       if (cacheExpired) {
         cacheQuery.remove();
       } else {
-        log("Cached!");
-        return cachedResponse.toResponse();
+        if (useCache) return cachedResponse.toResponse();
       }
     }
 
-    final response = await _client.get(url, headers: headers);
+    final responseStream = await _client.send(request);
+    final response = await Response.fromStream(responseStream);
 
-    box.putAsync(CachedHttpResponse.fromResponse(response));
+    if (useCache) box.putAsync(CachedHttpResponse.fromResponse(response));
 
     return response;
   }
