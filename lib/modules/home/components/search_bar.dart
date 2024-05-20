@@ -36,7 +36,7 @@ class _AppSearchBarState extends State<AppSearchBar> {
                     : const Radius.circular(28),
               ),
             ),
-            leading: isSearching || _searchController.results != null
+            leading: isSearching || _searchController.resultsParks != null
                 ? IconButton(
                     icon: const Icon(Icons.arrow_back), onPressed: _searchController.exitSearch)
                 : null,

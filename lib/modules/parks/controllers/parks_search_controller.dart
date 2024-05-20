@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_config/flutter_config.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -40,8 +41,11 @@ class ParksSearchController extends ChangeNotifier {
   Debouncer debouncer = Debouncer(delay: const Duration(milliseconds: 500));
 
   bool isSearching = false;
+  bool isLoadingSearch = false;
   List<AddressSearchResult> searchSuggestions = [];
-  List<SearchResult>? results = [];
+  List<AddressSearchResult> addressesResults = [];
+  List<SearchResult>? resultsParks = [];
+  SearchResult? selectedPark;
 
   final FocusNode searchInputFocusNode;
   final TextEditingController queryTextController;
@@ -67,7 +71,7 @@ class ParksSearchController extends ChangeNotifier {
   void exitSearch() {
     _cleanSearchText();
     isSearching = false;
-    results = null;
+    resultsParks = null;
     searchSuggestions = [];
 
     searchInputFocusNode.unfocus();
@@ -78,7 +82,8 @@ class ParksSearchController extends ChangeNotifier {
   Future<void> searchCurrentQuery() async {
     if (debouncer.isRunning) await debouncer.future;
 
-    results = searchSuggestions.whereType<SearchResult>().toList();
+    addressesResults = searchSuggestions.whereType<AddressSearchResult>().toList();
+    resultsParks = searchSuggestions.whereType<SearchResult>().toList();
     isSearching = false;
 
     notifyListeners();
@@ -116,27 +121,44 @@ class ParksSearchController extends ChangeNotifier {
       }
 
       searchAddresses() async {
+        // final uri = Uri.https(
+        //   'nominatim.openstreetmap.org',
+        //   '/search.php',
+        //   {
+        //     'countrycodes': 'br',
+        //     'format': 'jsonv2',
+        //     'limit': '20',
+        //     'q': query,
+        //   },
+        // );
         final uri = Uri.https(
-          'nominatim.openstreetmap.org',
-          '/search.php',
-          {
-            'countrycodes': 'br',
-            'format': 'jsonv2',
-            'limit': '20',
-            'q': query,
-          },
+          'places.googleapis.com',
+          '/v1/places:searchText',
+          {'key': FlutterConfig.get('GOOGLE_MAPS_SEARCH_API_KEY')},
         );
 
-        final response = await _httpClient.get(uri);
+        final response = await _httpClient.post(
+          uri,
+          body: {'textQuery': query, 'languageCode': 'pt'},
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Goog-Api-Key': FlutterConfig.get('GOOGLE_MAPS_SEARCH_API_KEY'),
+            'X-Goog-FieldMask': 'places.displayName,places.formattedAddress,places.location'
+          },
+        );
 
         final addressesData = json.decode(response.body);
 
         if (response.statusCode == 200) {
-          return (addressesData as List)
+          final List list = addressesData["places"];
+          return list
               .map((map) => AddressSearchResult(
-                    label: map['name'],
-                    address: "",
-                    location: LatLng(double.parse(map["lat"]), double.parse(map["lon"])),
+                    label: map['displayName']['text'],
+                    address: map["formattedAddress"],
+                    location: LatLng(
+                      map["location"]["latitude"],
+                      map["location"]["longitude"],
+                    ),
                   ))
               .toList();
         } else {

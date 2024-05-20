@@ -32,15 +32,15 @@ class SearchResultsPage extends StatelessWidget {
           )
         ],
       ),
-      body: controller.results == null
+      body: controller.resultsParks == null
           ? const Center(
               child: Text("Nenhum resultado disponível"),
             )
           : ListView.separated(
               separatorBuilder: (context, index) => const Divider(height: 0),
-              itemCount: controller.results!.length,
+              itemCount: controller.resultsParks!.length,
               itemBuilder: (context, index) {
-                final item = controller.results![index];
+                final item = controller.resultsParks![index];
 
                 return ListTile(
                   title: Text(item.label),

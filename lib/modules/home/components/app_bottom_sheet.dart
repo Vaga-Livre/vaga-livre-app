@@ -15,8 +15,8 @@ class AppBottomSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final _searchController = context.watch<ParksSearchController>();
 
-    if (_searchController.results?.isNotEmpty == true) {
-      final results = _searchController.results!;
+    if (_searchController.resultsParks?.isNotEmpty == true) {
+      final results = _searchController.resultsParks!;
       final pluralResults = results.length > 1;
 
       return SizedBox(
