@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_config/flutter_config.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
@@ -12,16 +11,17 @@ import 'modules/home/pages/home_page.dart';
 import 'modules/home/pages/search_results_page.dart';
 import 'modules/parks/controllers/parks_search_controller.dart';
 import 'theme.dart';
+import 'utils/enviroment.dart';
 import 'utils/object_box.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await FlutterConfig.loadEnvVariables();
+  await Environment.initialize();
   initializeDateFormatting('pt_BR', null);
 
   await Supabase.initialize(
-    url: FlutterConfig.get('PUBLIC_SUPABASE_URL'),
-    anonKey: FlutterConfig.get('PUBLIC_SUPABASE_ANON_KEY'),
+    url: Environment.get('PUBLIC_SUPABASE_URL'),
+    anonKey: Environment.get('PUBLIC_SUPABASE_ANON_KEY'),
   );
 
   await ObjectBox.initialize();

@@ -1,13 +1,14 @@
 import 'dart:convert';
 
+import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_config/flutter_config.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../../utils/debouncer.dart';
 import '../../../utils/cached_http_client.dart';
+import '../../../utils/debouncer.dart';
+import '../../../utils/enviroment.dart';
 import '../../../utils/object_box.dart';
 import '../../../utils/typedefs.dart';
 import '../../home/controller/map_controller.dart';
@@ -35,7 +36,7 @@ class SearchResult extends AddressSearchResult {
   });
 }
 
-class ParksSearchController extends ChangeNotifier {
+class ParksSearchController extends Cubit<ParkSearchState> with ChangeNotifier {
   final MapController mapController;
 
   Debouncer debouncer = Debouncer(delay: const Duration(milliseconds: 500));
@@ -56,7 +57,8 @@ class ParksSearchController extends ChangeNotifier {
   ParksSearchController(
       {required this.searchInputFocusNode,
       required this.queryTextController,
-      required this.mapController}) {
+      required this.mapController})
+      : super(LoadingResults()) {
     queryTextController.addListener(() => searchRecommendations());
   }
 
@@ -72,6 +74,7 @@ class ParksSearchController extends ChangeNotifier {
     _cleanSearchText();
     isSearching = false;
     resultsParks = null;
+    addressesResults = [];
     searchSuggestions = [];
 
     searchInputFocusNode.unfocus();
@@ -134,7 +137,7 @@ class ParksSearchController extends ChangeNotifier {
         final uri = Uri.https(
           'places.googleapis.com',
           '/v1/places:searchText',
-          {'key': FlutterConfig.get('GOOGLE_MAPS_SEARCH_API_KEY')},
+          {'key': Environment.get('GOOGLE_MAPS_SEARCH_API_KEY')},
         );
 
         final response = await _httpClient.post(
@@ -142,7 +145,7 @@ class ParksSearchController extends ChangeNotifier {
           body: {'textQuery': query, 'languageCode': 'pt'},
           headers: {
             'Content-Type': 'application/json',
-            'X-Goog-Api-Key': FlutterConfig.get('GOOGLE_MAPS_SEARCH_API_KEY'),
+            'X-Goog-Api-Key': Environment.get('GOOGLE_MAPS_SEARCH_API_KEY'),
             'X-Goog-FieldMask': 'places.displayName,places.formattedAddress,places.location'
           },
         );
@@ -174,9 +177,10 @@ class ParksSearchController extends ChangeNotifier {
         searchAddresses(),
       ]);
 
-      searchSuggestions = [...parks, ...addresses];
+      searchSuggestions = [...addresses];
 
       notifyListeners();
+      emit(DestinationsSearchResults(destinations: addresses));
     });
   }
 
@@ -185,6 +189,31 @@ class ParksSearchController extends ChangeNotifier {
         onMatch: (match) => " | ",
         onNonMatch: (match) => "$match:*",
       );
+
+  void searchParksCloseTo(AddressSearchResult destination) async {
+    final List<JsonType> resultsData = await _supabaseClient.rpc(
+      'parks_nearby',
+      params: {
+        "lat": destination.location.latitude,
+        "lon": destination.location.longitude,
+      },
+    );
+
+    final data = resultsData
+        .map((e) => SearchResult(
+              label: e["name"],
+              address: e["address_line"],
+              description: e["description"],
+              location: LatLng(double.parse(e["latitude"]), double.parse(e["longitude"])),
+              slotsCount: 0,
+              price: (e["hourly_rate"] as num).toDouble(),
+            ))
+        .toList();
+
+    resultsParks = data;
+    emit(ParksNearbyDestinationResults(destination: destination, parksNearby: data));
+    notifyListeners();
+  }
 
   // selectTerm(SearchResult term) {
   //   results = [term];
@@ -208,3 +237,29 @@ class ParksSearchController extends ChangeNotifier {
     super.dispose();
   }
 }
+
+sealed class ParkSearchState {
+  const ParkSearchState();
+}
+
+class ParksNearbyDestinationResults extends ParkSearchState {
+  final AddressSearchResult destination;
+  final List<SearchResult> parksNearby;
+
+  ParksNearbyDestinationResults({required this.destination, required this.parksNearby});
+}
+
+class DestinationsSearchResults extends ParkSearchState {
+  final List<AddressSearchResult> destinations;
+
+  DestinationsSearchResults({required this.destinations});
+}
+
+/// Map without any search should show the available parks in the map view
+class MapViewParksResults extends ParkSearchState {
+  final List<SearchResult> parksNearby;
+
+  MapViewParksResults({required this.parksNearby});
+}
+
+class LoadingResults extends ParkSearchState {}

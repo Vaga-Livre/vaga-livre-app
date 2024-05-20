@@ -24,6 +24,8 @@ dependencies:
   http: ^1.2.1
   objectbox: ^4.0.0
   objectbox_flutter_libs: any
+  bloc: ^8.1.4
+  flutter_dotenv: ^5.1.0
 
 dev_dependencies:
   flutter_test:
@@ -36,6 +38,7 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
+    - .env
     - assets/images/darker.png
     - assets/images/darker_expanded.png
   #   - images/a_dot_ham.jpeg

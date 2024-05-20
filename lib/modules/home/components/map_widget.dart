@@ -33,7 +33,6 @@ class MapWidget extends StatelessWidget {
             showMenu(
               context: context,
               position: lastTapPosition ?? const RelativeRect.fromLTRB(0, 0, 0, 0),
-
               items: [
                 const PopupMenuItem(child: Text("Encontrar estacionamentos próximos")),
               ],
@@ -67,7 +66,8 @@ class MapWidget extends StatelessWidget {
                     position: e.location,
                     infoWindow: InfoWindow(
                       title: e.label,
-                      snippet: "Encontrar estacionamentos próximos",
+                      snippet: "Toque para encontrar estacionamentos próximos",
+                      onTap: () => searchController.searchParksCloseTo(e),
                     ),
                   ),
                 )
