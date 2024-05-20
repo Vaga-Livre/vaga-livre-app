@@ -33,9 +33,12 @@ class CachedHttpClient {
     return send(request, true);
   }
 
-  Future<Response> send(BaseRequest request, bool useCache) async {
+  Future<Response> send(Request request, bool useCache) async {
     final box = _objBoxStore.box<CachedHttpResponse>();
-    final cacheQuery = box.query(CachedHttpResponse_.url.equals(request.url.toString())).build();
+    final cacheQuery = box
+        .query(
+            CachedHttpResponse_.url.equals("${request.url.toString()} + ${request.body.hashCode}"))
+        .build();
 
     final cachedResponse = cacheQuery.findUnique();
     if (cachedResponse != null) {
