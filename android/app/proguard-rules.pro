@@ -1,0 +1,1 @@
+-keep class br.com.vagalivre.app.BuildConfig { *; }

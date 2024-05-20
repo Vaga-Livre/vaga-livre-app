@@ -1,0 +1,69 @@
+{
+  "_note1": "KEEP THIS FILE! Check it into a version control system (VCS) like git.",
+  "_note2": "ObjectBox manages crucial IDs for your object model. See docs for details.",
+  "_note3": "If you have VCS merge conflicts, you must resolve them according to ObjectBox docs.",
+  "entities": [
+    {
+      "id": "1:7605238826594003701",
+      "lastPropertyId": "8:354228886042889577",
+      "name": "CachedHttpResponse",
+      "properties": [
+        {
+          "id": "1:5938946693338494661",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:4445441827642852256",
+          "name": "url",
+          "type": 9,
+          "flags": 34848,
+          "indexId": "1:6054921554504126497"
+        },
+        {
+          "id": "3:924828545102877198",
+          "name": "responseBytes",
+          "type": 23
+        },
+        {
+          "id": "4:676206157546122389",
+          "name": "statusCode",
+          "type": 6
+        },
+        {
+          "id": "5:945500332492135410",
+          "name": "isRedirect",
+          "type": 1
+        },
+        {
+          "id": "6:6019523448492226529",
+          "name": "reasonPhrase",
+          "type": 9
+        },
+        {
+          "id": "7:7926981981124650018",
+          "name": "dbUtcDate",
+          "type": 6
+        },
+        {
+          "id": "8:354228886042889577",
+          "name": "headersJson",
+          "type": 9
+        }
+      ],
+      "relations": []
+    }
+  ],
+  "lastEntityId": "1:7605238826594003701",
+  "lastIndexId": "1:6054921554504126497",
+  "lastRelationId": "0:0",
+  "lastSequenceId": "0:0",
+  "modelVersion": 5,
+  "modelVersionParserMinimum": 5,
+  "retiredEntityUids": [],
+  "retiredIndexUids": [],
+  "retiredPropertyUids": [],
+  "retiredRelationUids": [],
+  "version": 1
+}
