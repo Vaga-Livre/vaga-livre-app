@@ -60,9 +60,10 @@ final _router = GoRouter(initialLocation: "/", routes: [
     builder: (_, __) => const HomePage(),
     routes: [
       GoRoute(
-          path: "search-results",
-          name: "search-results",
-          builder: (context, _) => SearchResultsPage.builder(context))
+        path: "search-results",
+        name: "search-results",
+        builder: (_, __) => const SearchResultsPage(),
+      )
     ],
   ),
   GoRoute(path: "/user/history", name: "history", builder: (_, state) => Container()),

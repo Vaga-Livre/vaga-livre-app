@@ -14,9 +14,10 @@ class AppBottomSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final _searchController = context.watch<ParksSearchController>();
+    final state = _searchController.state;
 
-    if (_searchController.resultsParks?.isNotEmpty == true) {
-      final results = _searchController.resultsParks!;
+    if (state is ParksNearbyDestinationResults) {
+      final results = state.parksNearby;
       final pluralResults = results.length > 1;
 
       return SizedBox(
@@ -30,7 +31,7 @@ class AppBottomSheet extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(bottom: 8),
                 child: Text(
-                  "${results.length} ${pluralResults ? "estacionamentos" : "estacionamento"} perto",
+                  "${results.length} ${pluralResults ? "estacionamentos" : "estacionamento"} perto de ${state.destination.label}",
                   style: context.textTheme.titleLarge,
                 ),
               ),

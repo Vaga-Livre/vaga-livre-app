@@ -41,24 +41,20 @@ class ParksSearchController extends Cubit<ParkSearchState> with ChangeNotifier {
 
   Debouncer debouncer = Debouncer(delay: const Duration(milliseconds: 500));
 
+  // Search Bar ->
   bool isSearching = false;
-  bool isLoadingSearch = false;
-  List<AddressSearchResult> searchSuggestions = [];
-  List<AddressSearchResult> addressesResults = [];
-  List<SearchResult>? resultsParks = [];
-  SearchResult? selectedPark;
-
   final FocusNode searchInputFocusNode;
   final TextEditingController queryTextController;
+  // <- Search Bar
 
   final _httpClient = CachedHttpClient(Client(), ObjectBox.store);
   final _supabaseClient = Supabase.instance.client;
 
-  ParksSearchController(
-      {required this.searchInputFocusNode,
-      required this.queryTextController,
-      required this.mapController})
-      : super(LoadingResults()) {
+  ParksSearchController({
+    required this.searchInputFocusNode,
+    required this.queryTextController,
+    required this.mapController,
+  }) : super(MapViewParksResults(parksNearby: [])) {
     queryTextController.addListener(() => searchRecommendations());
   }
 
@@ -73,22 +69,16 @@ class ParksSearchController extends Cubit<ParkSearchState> with ChangeNotifier {
   void exitSearch() {
     _cleanSearchText();
     isSearching = false;
-    resultsParks = null;
-    addressesResults = [];
-    searchSuggestions = [];
 
     searchInputFocusNode.unfocus();
 
     notifyListeners();
+    emit(MapViewParksResults(parksNearby: []));
   }
 
   Future<void> searchCurrentQuery() async {
     if (debouncer.isRunning) await debouncer.future;
-
-    addressesResults = searchSuggestions.whereType<AddressSearchResult>().toList();
-    resultsParks = searchSuggestions.whereType<SearchResult>().toList();
     isSearching = false;
-
     notifyListeners();
   }
 
@@ -102,6 +92,8 @@ class ParksSearchController extends Cubit<ParkSearchState> with ChangeNotifier {
     if (queryTextController.text.isEmpty) {
       return;
     }
+
+    final originalState = state;
 
     await debouncer.run(() async {
       final query = queryTextController.text.trim();
@@ -177,10 +169,12 @@ class ParksSearchController extends Cubit<ParkSearchState> with ChangeNotifier {
         searchAddresses(),
       ]);
 
-      searchSuggestions = [...addresses];
-
-      notifyListeners();
-      emit(DestinationsSearchResults(destinations: addresses));
+      if (state == originalState) {
+        emit(DestinationsSearchResults(
+          suggestedParks: parks.cast(),
+          destinations: addresses,
+        ));
+      }
     });
   }
 
@@ -199,7 +193,7 @@ class ParksSearchController extends Cubit<ParkSearchState> with ChangeNotifier {
       },
     );
 
-    final data = resultsData
+    final parks = resultsData
         .map((e) => SearchResult(
               label: e["name"],
               address: e["address_line"],
@@ -210,8 +204,13 @@ class ParksSearchController extends Cubit<ParkSearchState> with ChangeNotifier {
             ))
         .toList();
 
-    resultsParks = data;
-    emit(ParksNearbyDestinationResults(destination: destination, parksNearby: data));
+    // Set destination as query Text
+
+    emit(ParksNearbyDestinationResults(
+      query: destination.label,
+      destination: destination,
+      parksNearby: parks,
+    ));
     notifyListeners();
   }
 
@@ -228,7 +227,6 @@ class ParksSearchController extends Cubit<ParkSearchState> with ChangeNotifier {
 
   void _cleanSearchText() {
     queryTextController.text = "";
-    searchSuggestions = [];
   }
 
   @override
@@ -242,17 +240,23 @@ sealed class ParkSearchState {
   const ParkSearchState();
 }
 
+/// Parks nearby a destination
 class ParksNearbyDestinationResults extends ParkSearchState {
+  final String query;
   final AddressSearchResult destination;
   final List<SearchResult> parksNearby;
 
-  ParksNearbyDestinationResults({required this.destination, required this.parksNearby});
+  ParksNearbyDestinationResults(
+      {required this.query, required this.destination, required this.parksNearby});
 }
 
+/// This can be shown as search suggestions and in the map
 class DestinationsSearchResults extends ParkSearchState {
+  // Suggestions only. Should not be displayed in the map
+  final List<SearchResult> suggestedParks;
   final List<AddressSearchResult> destinations;
 
-  DestinationsSearchResults({required this.destinations});
+  DestinationsSearchResults({required this.suggestedParks, required this.destinations});
 }
 
 /// Map without any search should show the available parks in the map view

@@ -26,6 +26,7 @@ dependencies:
   objectbox_flutter_libs: any
   bloc: ^8.1.4
   flutter_dotenv: ^5.1.0
+  flutter_bloc: ^8.1.5
 
 dev_dependencies:
   flutter_test:
