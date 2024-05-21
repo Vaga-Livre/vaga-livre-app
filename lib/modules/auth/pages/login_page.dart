@@ -27,8 +27,17 @@ class _LoginPageState extends State<LoginPage> {
             children: [
               Container(
                 color: context.colorScheme.primary,
-                height: 177,
-                child: Image.asset('assets/images/darker_expanded.png'),
+                height: 127 + 50,
+                child: Center(
+                  child: Hero(
+                    tag: "splash-image-login",
+                    child: Image.asset(
+                      'assets/images/darker_expanded.png',
+                      height: 127,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
               ),
               spaceDefault,
               Padding(
