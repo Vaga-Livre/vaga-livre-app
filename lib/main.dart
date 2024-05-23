@@ -11,6 +11,7 @@ import 'modules/home/controllers/map_controller.dart';
 import 'modules/home/controllers/parks_search_controller.dart';
 import 'modules/home/pages/home_page.dart';
 import 'modules/home/pages/search_results_page.dart';
+import 'modules/park/park_page.dart';
 import 'theme.dart';
 import 'utils/enviroment.dart';
 import 'utils/object_box.dart';
@@ -67,7 +68,11 @@ final _router = GoRouter(initialLocation: "/splash", routes: [
     ],
   ),
   GoRoute(path: "/user/history", name: "history", builder: (_, state) => Container()),
-  GoRoute(path: "/park/:id", name: "park-info", builder: (_, state) => Container()),
+  GoRoute(
+      path: "/park",
+      builder: (_, state) => ParkPage(
+            park: state.extra as ParkResult,
+          )),
   GoRoute(
       path: "/login",
       builder: (_, __) => const LoginPage(),
