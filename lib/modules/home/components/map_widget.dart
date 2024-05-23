@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-import '../../parks/controllers/parks_search_controller.dart';
-import '../controller/map_controller.dart';
+import '../controllers/map_controller.dart';
+import '../controllers/parks_search_controller.dart';
 
 class MapWidget extends StatelessWidget {
   RelativeRect? lastTapPosition;
@@ -71,8 +71,7 @@ class MapWidget extends StatelessWidget {
                     PopupMenuItem(
                       child: const Text("Encontrar estacionamentos próximos"),
                       onTap: () => searchController.searchParksCloseTo(
-                        AddressSearchResult(
-                            label: "local do mapa", address: "", location: location),
+                        DestinationResult(label: "local do mapa", address: "", location: location),
                       ),
                     ),
                   ],
@@ -100,7 +99,7 @@ extension _CustomMarker on Marker {
     );
   }
 
-  static park(SearchResult park, void Function() onTap) {
+  static park(ParkResult park, void Function() onTap) {
     return Marker(
       onTap: onTap,
       visible: true,

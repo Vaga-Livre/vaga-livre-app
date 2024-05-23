@@ -5,16 +5,16 @@ import 'package:provider/provider.dart';
 import '../../../config/extension.dart';
 import '../../../utils/formatters.dart';
 import '../../../utils/initial_letters.dart';
-import '../../parks/controllers/parks_search_controller.dart';
-import '../controller/map_controller.dart';
+import '../controllers/map_controller.dart';
+import '../controllers/parks_search_controller.dart';
 
 class AppBottomSheet extends StatelessWidget {
-  AppBottomSheet({super.key});
+  const AppBottomSheet({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final _searchController = context.watch<ParksSearchController>();
-    final state = _searchController.state;
+    final searchController = context.watch<ParksSearchController>();
+    final state = searchController.state;
 
     if (state is ParksNearbyDestinationResults) {
       final results = state.parksNearby;

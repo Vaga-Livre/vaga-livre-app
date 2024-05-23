@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../parks/controllers/parks_search_controller.dart';
+import '../controllers/parks_search_controller.dart';
 
 class AppSearchBar extends StatefulWidget {
   const AppSearchBar({super.key});
@@ -90,9 +90,10 @@ class _AppSearchBarState extends State<AppSearchBar> {
                               final suggestion = suggestions[i ~/ 2];
                               return ListTile(
                                 dense: true,
+                                // TODO :use switch to ensure exaustive checking
                                 title: Text(suggestion.label),
-                                onTap: () => suggestion is SearchResult
-                                    ? context.push("/park/${suggestion.label}")
+                                onTap: () => suggestion is ParkResult
+                                    ? context.push("/park", extra: suggestion)
                                     : searchController.searchParksCloseTo(suggestion),
                               );
                             } else {

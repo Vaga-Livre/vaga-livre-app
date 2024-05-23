@@ -11,22 +11,22 @@ import '../../../utils/debouncer.dart';
 import '../../../utils/enviroment.dart';
 import '../../../utils/object_box.dart';
 import '../../../utils/typedefs.dart';
-import '../../home/controller/map_controller.dart';
+import 'map_controller.dart';
 
-class AddressSearchResult {
+class DestinationResult {
   final String label;
   final String address;
   final LatLng location;
 
-  const AddressSearchResult({required this.label, required this.address, required this.location});
+  const DestinationResult({required this.label, required this.address, required this.location});
 }
 
-class SearchResult extends AddressSearchResult {
+class ParkResult extends DestinationResult {
   final String description;
   final int slotsCount;
   final double price;
 
-  const SearchResult({
+  const ParkResult({
     required super.label,
     required super.address,
     required super.location,
@@ -103,10 +103,10 @@ class ParksSearchController extends Cubit<ParkSearchState> with ChangeNotifier {
         final List<JsonType> resultsData =
             await _supabaseClient.from("park").select().textSearch("name", terms);
 
-        final data = resultsData.map((e) => SearchResult(
+        final data = resultsData.map((e) => ParkResult(
               label: e["name"],
               address: e["address_line"],
-              description: e["description"],
+              description: (e["description"] as String).replaceAll("\\n", '\n'),
               location: LatLng(double.parse(e["latitude"]), double.parse(e["longitude"])),
               slotsCount: 0,
               price: (e["hourly_rate"] as num).toDouble(),
@@ -147,7 +147,7 @@ class ParksSearchController extends Cubit<ParkSearchState> with ChangeNotifier {
         if (response.statusCode == 200) {
           final List list = addressesData["places"];
           return list
-              .map((map) => AddressSearchResult(
+              .map((map) => DestinationResult(
                     label: map['displayName']['text'],
                     address: map["formattedAddress"],
                     location: LatLng(
@@ -164,7 +164,7 @@ class ParksSearchController extends Cubit<ParkSearchState> with ChangeNotifier {
 
       // nome pra listar os endereços: Destinos
 
-      final [parks, addresses] = await Future.wait<List<AddressSearchResult>>([
+      final [parks, addresses] = await Future.wait<List<DestinationResult>>([
         searchParks(),
         searchAddresses(),
       ]);
@@ -184,7 +184,7 @@ class ParksSearchController extends Cubit<ParkSearchState> with ChangeNotifier {
         onNonMatch: (match) => "$match:*",
       );
 
-  void searchParksCloseTo(AddressSearchResult destination) async {
+  void searchParksCloseTo(DestinationResult destination) async {
     final List<JsonType> resultsData = await _supabaseClient.rpc(
       'parks_nearby',
       params: {
@@ -194,7 +194,7 @@ class ParksSearchController extends Cubit<ParkSearchState> with ChangeNotifier {
     );
 
     final parks = resultsData
-        .map((e) => SearchResult(
+        .map((e) => ParkResult(
               label: e["name"],
               address: e["address_line"],
               description: e["description"],
@@ -243,8 +243,8 @@ sealed class ParkSearchState {
 /// Parks nearby a destination
 class ParksNearbyDestinationResults extends ParkSearchState {
   final String query;
-  final AddressSearchResult destination;
-  final List<SearchResult> parksNearby;
+  final DestinationResult destination;
+  final List<ParkResult> parksNearby;
 
   ParksNearbyDestinationResults(
       {required this.query, required this.destination, required this.parksNearby});
@@ -253,15 +253,15 @@ class ParksNearbyDestinationResults extends ParkSearchState {
 /// This can be shown as search suggestions and in the map
 class DestinationsSearchResults extends ParkSearchState {
   // Suggestions only. Should not be displayed in the map
-  final List<SearchResult> suggestedParks;
-  final List<AddressSearchResult> destinations;
+  final List<ParkResult> suggestedParks;
+  final List<DestinationResult> destinations;
 
   DestinationsSearchResults({required this.suggestedParks, required this.destinations});
 }
 
 /// Map without any search should show the available parks in the map view
 class MapViewParksResults extends ParkSearchState {
-  final List<SearchResult> parksNearby;
+  final List<ParkResult> parksNearby;
 
   MapViewParksResults({required this.parksNearby});
 }
