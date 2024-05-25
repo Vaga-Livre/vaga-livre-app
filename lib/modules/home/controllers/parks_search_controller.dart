@@ -2,8 +2,8 @@ import 'dart:convert';
 
 import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../utils/cached_http_client.dart';
@@ -37,7 +37,7 @@ class ParkResult extends DestinationResult {
 }
 
 class ParksSearchController extends Cubit<ParkSearchState> with ChangeNotifier {
-  final MapController mapController;
+  final MyMapController mapController;
 
   Debouncer debouncer = Debouncer(delay: const Duration(milliseconds: 500));
 

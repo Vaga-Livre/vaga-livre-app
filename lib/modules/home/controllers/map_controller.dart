@@ -1,36 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:latlong2/latlong.dart';
 
-class MapController extends ChangeNotifier {
+class MyMapController extends ChangeNotifier {
   double userLatitude = 0.0;
   double userLongitude = 0.0;
   String erro = '';
-  late GoogleMapController mapsController;
+  MapController mapsController = MapController();
 
-  onMapCreated(GoogleMapController gmc) async {
-    mapsController = gmc;
-    getPosition();
-    print("created");
-  }
+  // void getPosition() async {
+  //   try {
+  //     Position position = await _getCurrentUserPosition();
 
-  void getPosition() async {
-    try {
-      Position position = await _getCurrentUserPosition();
+  //     userLatitude = position.latitude;
+  //     userLongitude = position.longitude;
 
-      userLatitude = position.latitude;
-      userLongitude = position.longitude;
+  //     focusOn(LatLng(userLatitude, userLongitude));
+  //   } catch (e) {
+  //     erro = e.toString();
+  //   }
 
-      focusOn(LatLng(userLatitude, userLongitude));
-    } catch (e) {
-      erro = e.toString();
-    }
-
-    notifyListeners();
-  }
+  //   notifyListeners();
+  // }
 
   void focusOn(LatLng local) {
-    mapsController.animateCamera(CameraUpdate.newLatLng(local));
+    mapsController.move(local, mapsController.camera.zoom);
   }
 
   Future<Position> _getCurrentUserPosition() async {

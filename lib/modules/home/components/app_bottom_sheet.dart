@@ -51,7 +51,7 @@ class AppBottomSheet extends StatelessWidget {
                           margin: const EdgeInsets.only(right: 10),
                           child: InkWell(
                             onTap: () {
-                              context.read<MapController>().focusOn(park.location);
+                              context.read<MyMapController>().focusOn(park.location);
                             },
                             child: Container(
                               width: 350,

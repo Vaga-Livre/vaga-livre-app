@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:http/http.dart';
+import 'package:objectbox/objectbox.dart';
 import 'package:vagalivre/objectbox.g.dart';
 
 class CachedHttpClient {

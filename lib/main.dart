@@ -36,14 +36,14 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<MapController>(
-      create: (_) => MapController(),
+    return ChangeNotifierProvider<MyMapController>(
+      create: (_) => MyMapController(),
       lazy: false,
       child: ChangeNotifierProvider(
         create: (context) => ParksSearchController(
             queryTextController: TextEditingController(text: ""),
             searchInputFocusNode: FocusNode(),
-            mapController: context.read<MapController>()),
+            mapController: context.read<MyMapController>()),
         child: MaterialApp.router(
           routerConfig: _router,
           title: 'Flutter Demo',
