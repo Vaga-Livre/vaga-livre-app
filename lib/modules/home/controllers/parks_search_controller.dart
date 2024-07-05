@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
@@ -8,7 +9,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../utils/cached_http_client.dart';
 import '../../../utils/debouncer.dart';
-import '../../../utils/enviroment.dart';
 import '../../../utils/object_box.dart';
 import '../../../utils/typedefs.dart';
 import 'map_controller.dart';
@@ -116,43 +116,43 @@ class ParksSearchController extends Cubit<ParkSearchState> with ChangeNotifier {
       }
 
       searchAddresses() async {
-        // final uri = Uri.https(
-        //   'nominatim.openstreetmap.org',
-        //   '/search.php',
-        //   {
-        //     'countrycodes': 'br',
-        //     'format': 'jsonv2',
-        //     'limit': '20',
-        //     'q': query,
-        //   },
-        // );
         final uri = Uri.https(
-          'places.googleapis.com',
-          '/v1/places:searchText',
-          {'key': Environment.get('GOOGLE_MAPS_SEARCH_API_KEY')},
-        );
-
-        final response = await _httpClient.post(
-          uri,
-          body: {'textQuery': query, 'languageCode': 'pt'},
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Goog-Api-Key': Environment.get('GOOGLE_MAPS_SEARCH_API_KEY'),
-            'X-Goog-FieldMask': 'places.displayName,places.formattedAddress,places.location'
+          'nominatim.openstreetmap.org',
+          '/search.php',
+          {
+            'countrycodes': 'br',
+            'format': 'jsonv2',
+            'limit': '20',
+            'q': query,
           },
+        );
+        // final uri = Uri.https(
+        //   'places.googleapis.com',
+        //   '/v1/places:searchText',
+        //   {'key': Environment.get('GOOGLE_MAPS_SEARCH_API_KEY')},
+        // );
+
+        final response = await _httpClient.get(
+          uri,
+          // body: {'textQuery': query, 'languageCode': 'pt'},
+          // headers: {
+          //   'Content-Type': 'application/json',
+          //   'X-Goog-Api-Key': Environment.get('GOOGLE_MAPS_SEARCH_API_KEY'),
+          //   'X-Goog-FieldMask': 'places.displayName,places.formattedAddress,places.location'
+          // },
         );
 
         final addressesData = json.decode(response.body);
 
         if (response.statusCode == 200) {
-          final List list = addressesData["places"];
+          final list = (addressesData as List).cast<JsonType>();
           return list
               .map((map) => DestinationResult(
-                    label: map['displayName']['text'],
-                    address: map["formattedAddress"],
+                    label: map["name"],
+                    address: map["display_name"],
                     location: LatLng(
-                      map["location"]["latitude"],
-                      map["location"]["longitude"],
+                      double.parse(map["lat"]),
+                      double.parse(map["lon"]),
                     ),
                   ))
               .toList();
@@ -167,7 +167,12 @@ class ParksSearchController extends Cubit<ParkSearchState> with ChangeNotifier {
       final [parks, addresses] = await Future.wait<List<DestinationResult>>([
         searchParks(),
         searchAddresses(),
-      ]);
+      ]).catchError(
+        (error, stackTrace) { 
+          log("Error on search recommendation", error: error, stackTrace: stackTrace);
+          return [];
+        },
+      );
 
       if (state == originalState) {
         emit(DestinationsSearchResults(
