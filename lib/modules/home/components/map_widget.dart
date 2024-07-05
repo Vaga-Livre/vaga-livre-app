@@ -1,4 +1,3 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -44,34 +43,37 @@ class MapWidget extends StatelessWidget {
 
         final theme = Theme.of(context);
 
-        return GestureDetector(
-          excludeFromSemantics: true,
-          behavior: HitTestBehavior.translucent,
-          onTapDown: (details) {
-            lastTapPosition = RelativeRect.fromLTRB(
-              details.globalPosition.dx,
-              details.globalPosition.dy + 20,
-              details.globalPosition.dx,
-              details.globalPosition.dy,
-            );
-          },
-          child: FlutterMap(
-            mapController: mapController.mapsController,
-            options: MapOptions(
-              initialCenter: LatLng(mapController.userLatitude, mapController.userLongitude),
-            ),
-            children: [
-              TileLayer(
-                urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-                userAgentPackageName: 'br.com.vagalivre.app',
-              ),
-              CurrentLocationLayer(alignPositionOnUpdate: AlignOnUpdate.once),
-              MarkerLayer(markers: markers, rotate: true),
-              const Center(
-                child: Text("data"),
-              ),
-            ],
+        return FlutterMap(
+          mapController: mapController.mapsController,
+          options: MapOptions(
+            initialCenter: LatLng(mapController.userLatitude, mapController.userLongitude),
           ),
+          children: [
+            TileLayer(
+              urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+              userAgentPackageName: 'br.com.vagalivre.app',
+            ),
+            CurrentLocationLayer(
+              alignPositionOnUpdate: AlignOnUpdate.once,
+              indicators: const LocationMarkerIndicators(
+                permissionDenied: Icon(Icons.no_accounts),
+                permissionRequesting: Icon(Icons.refresh),
+                serviceDisabled: Icon(Icons.disabled_by_default),
+              ),
+            ),
+            MarkerLayer(
+              markers: markers,
+              rotate: true,
+              alignment: Alignment.center,
+            ),
+            const Align(
+              alignment: Alignment.bottomRight,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [Text("data")],
+              ),
+            ),
+          ],
         );
       },
     );
@@ -92,8 +94,15 @@ class DestinationMarker extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return IconButton(
-      icon: Icon(Icons.location_on_rounded, size: 48, color: theme.colorScheme.tertiary),
+      iconSize: 48,
+      splashRadius: 56,
+      color: theme.colorScheme.error,
+      visualDensity: VisualDensity.standard,
+      isSelected: true,
+      alignment: Alignment.topCenter,
       onPressed: () => onPressed(destination),
+      icon: const Icon(Icons.location_on_rounded),
+      selectedIcon: const Icon(Icons.add_location_alt_rounded),
     );
   }
 }
