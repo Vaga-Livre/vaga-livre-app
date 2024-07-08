@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_map_animations/flutter_map_animations.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:vagalivre/modules/home/components/map/components/park_details.dart';
 
 import '../controllers/map_controller.dart';
 import '../controllers/parks_search_controller.dart';
@@ -15,39 +17,70 @@ class MapWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final mapController = context.watch<MyMapController>();
+    final myMapController = context.watch<MyMapController>();
     final searchController = context.read<ParksSearchController>();
     return BlocBuilder<ParksSearchController, ParkSearchState>(
       builder: (context, state) {
-        final List<Marker> markers;
+        final List<AnimatedMarker> markers;
 
-        markerBuilder(DestinationResult result) => Marker(
+        markerBuilder(DestinationResult result, {required ParkResult? selectedPark}) =>
+            AnimatedMarker(
+              width: 48,
+              height: 64,
+              alignment: Alignment.topCenter,
               point: result.location,
-              child: result is ParkResult
-                  ? ParkMarker(
-                      park: result, onPressed: (result) => context.go("/park", extra: result))
-                  : DestinationMarker(
-                      destination: result, onPressed: searchController.searchParksCloseTo),
+              builder: (context, animation) {
+                return result is ParkResult
+                    ? ParkMarker(
+                        park: result,
+                        onPressed: (result) => context.go("/park", extra: result),
+                        selected: selectedPark == result,
+                      )
+                    : DestinationMarker(
+                        destination: result, onPressed: searchController.searchParksCloseTo);
+              },
             );
 
+        final List<DestinationResult> results;
         switch (state) {
           case LoadingResults():
-            markers = [];
+            results = [];
+            break;
           case MapViewParksResults(:final parksNearby):
-            markers = List.of([...parksNearby].map(markerBuilder));
+            results = [...parksNearby];
+            break;
           case ParksNearbyDestinationResults(:final parksNearby, :final destination):
-            markers = List.of([...parksNearby, destination].map(markerBuilder));
+            results = [...parksNearby, destination];
+            break;
           case DestinationsSearchResults(:final destinations):
-            markers = List.of([...destinations].map(markerBuilder));
+            results = [...destinations];
+            break;
         }
+
+        final selectedPark = state is ParksNearbyDestinationResults ? state.selectedPark : null;
+        markers = List.of(results.map(
+          (e) => markerBuilder(
+            e,
+            selectedPark: selectedPark,
+          ),
+        ));
+        final selectedParkDetails = selectedPark != null
+            ? AnimatedMarker(
+                point: selectedPark.location,
+                width: 250,
+                height: 152,
+                alignment: Alignment.topCenter,
+                builder: (context, animation) {
+                  return ParkDetails(park: selectedPark);
+                })
+            : null;
 
         final theme = Theme.of(context);
 
         return FlutterMap(
-          mapController: mapController.mapsController,
+          mapController: myMapController.animatedMapsController.mapController,
           options: MapOptions(
-            initialCenter: LatLng(mapController.userLatitude, mapController.userLongitude),
-          ),
+              initialCenter: LatLng(myMapController.userLatitude, myMapController.userLongitude)),
           children: [
             TileLayer(
               urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
@@ -61,8 +94,8 @@ class MapWidget extends StatelessWidget {
                 serviceDisabled: Icon(Icons.disabled_by_default),
               ),
             ),
-            MarkerLayer(
-              markers: markers,
+            AnimatedMarkerLayer(
+              markers: [...markers, if (selectedParkDetails != null) selectedParkDetails],
               rotate: true,
               alignment: Alignment.center,
             ),
@@ -111,19 +144,24 @@ class ParkMarker extends StatelessWidget {
   const ParkMarker({
     required this.park,
     required this.onPressed,
+    required this.selected,
     super.key,
   });
 
   final ParkResult park;
+  final bool selected;
   final void Function(ParkResult) onPressed;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return IconButton(
-      icon: Icon(Icons.location_on_rounded, size: 48, color: theme.colorScheme.primary),
+    return IconButton.filled(
+      padding: EdgeInsets.zero,
+      visualDensity: VisualDensity.compact,
       onPressed: () => onPressed(park),
+      color: selected ? theme.colorScheme.tertiary : theme.colorScheme.onPrimary,
+      icon: Icon(Icons.flag_circle_rounded),
     );
   }
 }

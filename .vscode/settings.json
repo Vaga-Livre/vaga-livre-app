@@ -2,5 +2,9 @@
     "cSpell.words": [
         "countrycodes",
         "jsonv"
+    ],
+    "conventionalCommits.scopes": [
+        "reservation",
+        "map"
     ]
 }

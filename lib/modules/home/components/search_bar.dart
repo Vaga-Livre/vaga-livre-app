@@ -29,9 +29,8 @@ class _AppSearchBarState extends State<AppSearchBar> {
           final hasSuggestions = isSearching &&
               (state is DestinationsSearchResults &&
                   (state.destinations.isNotEmpty || state.suggestedParks.isNotEmpty));
-          final suggestions = [
-            if (hasSuggestions) ...[...state.suggestedParks, ...state.destinations],
-          ];
+          final suggestions =
+              hasSuggestions ? [...state.suggestedParks, ...state.destinations] : [];
 
           return Column(
             children: [

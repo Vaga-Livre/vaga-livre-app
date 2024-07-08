@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_map_animations/flutter_map_animations.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 
@@ -7,7 +8,9 @@ class MyMapController extends ChangeNotifier {
   double userLatitude = 0.0;
   double userLongitude = 0.0;
   String erro = '';
-  MapController mapsController = MapController();
+  final AnimatedMapController animatedMapsController;
+
+  MyMapController({required this.animatedMapsController});
 
   // void getPosition() async {
   //   try {
@@ -25,7 +28,20 @@ class MyMapController extends ChangeNotifier {
   // }
 
   void focusOn(LatLng local) {
-    mapsController.move(local, mapsController.camera.zoom);
+    animatedMapsController.animateTo(
+      dest: local,
+    );
+  }
+
+  void focusOnAll(List<LatLng> locals) {
+    if (locals.isEmpty) return;
+    animatedMapsController.animatedFitCamera(
+      cameraFit: CameraFit.coordinates(
+        coordinates: locals,
+        padding: const EdgeInsets.all(64).copyWith(top: 16),
+      ),
+      rotation: 0,
+    );
   }
 
   Future<Position> _getCurrentUserPosition() async {
@@ -51,5 +67,11 @@ class MyMapController extends ChangeNotifier {
     }
 
     return await Geolocator.getCurrentPosition();
+  }
+
+  @override
+  void dispose() {
+    animatedMapsController.dispose();
+    super.dispose();
   }
 }

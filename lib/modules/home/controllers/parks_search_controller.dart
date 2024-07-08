@@ -168,7 +168,7 @@ class ParksSearchController extends Cubit<ParkSearchState> with ChangeNotifier {
         searchParks(),
         searchAddresses(),
       ]).catchError(
-        (error, stackTrace) { 
+        (error, stackTrace) {
           log("Error on search recommendation", error: error, stackTrace: stackTrace);
           return [];
         },
@@ -210,25 +210,36 @@ class ParksSearchController extends Cubit<ParkSearchState> with ChangeNotifier {
         .toList();
 
     // Set destination as query Text
-
+    queryTextController.text = destination.label;
+    searchInputFocusNode.unfocus();
+    mapController
+        .focusOnAll(List.of(<DestinationResult>[destination, ...parks].map((e) => e.location)));
     emit(ParksNearbyDestinationResults(
       query: destination.label,
       destination: destination,
       parksNearby: parks,
+      selectedPark: null,
     ));
+
     notifyListeners();
   }
 
-  // selectTerm(SearchResult term) {
-  //   results = [term];
-  //   searchInputFocusNode.unfocus();
-  //   queryTextController.text = term.label;
-  //   isSearching = false;
+  selectPark(ParkResult park) {
+    if (state is! ParksNearbyDestinationResults) return;
+    final originalState = state as ParksNearbyDestinationResults;
 
-  //   // mapController.focusOn(results)
+    emit(ParksNearbyDestinationResults(
+      query: originalState.query,
+      destination: originalState.destination,
+      parksNearby: originalState.parksNearby,
+      selectedPark: park,
+    ));
 
-  //   notifyListeners();
-  // }
+    searchInputFocusNode.unfocus();
+    mapController.focusOn(park.location);
+
+    notifyListeners();
+  }
 
   void _cleanSearchText() {
     queryTextController.text = "";
@@ -250,9 +261,14 @@ class ParksNearbyDestinationResults extends ParkSearchState {
   final String query;
   final DestinationResult destination;
   final List<ParkResult> parksNearby;
+  final ParkResult? selectedPark;
 
-  ParksNearbyDestinationResults(
-      {required this.query, required this.destination, required this.parksNearby});
+  ParksNearbyDestinationResults({
+    required this.query,
+    required this.destination,
+    required this.parksNearby,
+    required this.selectedPark,
+  });
 }
 
 /// This can be shown as search suggestions and in the map

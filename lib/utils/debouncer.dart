@@ -14,13 +14,14 @@ class Debouncer {
     _timer?.cancel();
 
     _completer = Completer();
+    final completer = _completer;
     _timer = Timer(delay, () async {
       try {
         await action();
 
-        _completer.complete();
+        completer.complete();
       } on Exception catch (e, st) {
-        _completer.completeError(e, st);
+        completer.completeError(e, st);
       }
     });
 
