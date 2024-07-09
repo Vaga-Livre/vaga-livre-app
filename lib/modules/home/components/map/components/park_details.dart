@@ -1,5 +1,10 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
-import 'package:vagalivre/modules/home/controllers/parks_search_controller.dart';
+import 'package:vector_math/vector_math_64.dart' show Vector3;
+
+import '../../../../../utils/formatters.dart';
+import '../../../controllers/parks_search_controller.dart';
 
 class ParkDetails extends StatelessWidget {
   const ParkDetails({
@@ -18,35 +23,60 @@ class ParkDetails extends StatelessWidget {
     return DefaultTextStyle(
       style: TextStyle(color: foregroundColor),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          Expanded(
-            child: Container(
+          Container(
+            decoration: ShapeDecoration(
               color: backgroundColor,
-              padding: const EdgeInsets.all(8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    park.label,
-                    style: theme.textTheme.titleMedium?.copyWith(color: foregroundColor),
+              shadows: kElevationToShadow[2],
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            padding: const EdgeInsets.all(8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  park.label,
+                  style: theme.textTheme.titleMedium?.copyWith(color: foregroundColor),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Valor: ${currencyFormatter.format(park.price)}",
+                      style: theme.textTheme.labelMedium?.copyWith(color: foregroundColor),
+                    ),
+                    Text(switch (park.slotsCount) { 1 => "1 espaço", _ => "${park.slotsCount} espaços" })
+                  ],
+                ),
+                const Divider(height: 4),
+                Align(
+                  alignment: Alignment.center,
+                  child: Text(
+                    "Toque para ver detalhes.",
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(color: foregroundColor),
                   ),
-                  Text("Algumas informações importantes"),
-                ],
+                )
+              ],
+            ),
+          ),
+          ClipRect(
+            child: SizedBox(
+              width: 30,
+              height: 30,
+              child: Transform(
+                alignment: Alignment.center,
+                transform: Matrix4.identity()
+                  ..translate(Vector3(0, -25, 0))
+                  ..rotateZ(pi / 4),
+                child: Container(
+                  width: 20,
+                  height: 20,
+                  decoration: BoxDecoration(color: backgroundColor, boxShadow: kElevationToShadow[2]),
+                ),
               ),
             ),
           ),
-          SizedBox(
-            width: 24,
-            height: 10,
-            child: CustomPaint(
-              painter: TrianglePainter(
-                strokeColor: backgroundColor,
-                paintingStyle: PaintingStyle.fill,
-                strokeWidth: 4,
-              ),
-            ),
-          ),
-          const SizedBox.square(dimension: 52),
         ],
       ),
     );
@@ -58,10 +88,7 @@ class TrianglePainter extends CustomPainter {
   final PaintingStyle paintingStyle;
   final double strokeWidth;
 
-  TrianglePainter(
-      {this.strokeColor = Colors.black,
-      this.strokeWidth = 3,
-      this.paintingStyle = PaintingStyle.stroke});
+  TrianglePainter({this.strokeColor = Colors.black, this.strokeWidth = 3, this.paintingStyle = PaintingStyle.stroke});
 
   @override
   void paint(Canvas canvas, Size size) {

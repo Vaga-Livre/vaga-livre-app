@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:provider/provider.dart';
 import 'package:supabase_auth_ui/supabase_auth_ui.dart';
 
 import 'modules/auth/pages/login_page.dart';
 import 'modules/auth/pages/register_user_info_page.dart';
 import 'modules/auth/pages/splash_page.dart';
-import 'modules/home/controllers/map_controller.dart';
 import 'modules/home/controllers/parks_search_controller.dart';
 import 'modules/home/pages/home_page.dart';
 import 'modules/home/pages/search_results_page.dart';

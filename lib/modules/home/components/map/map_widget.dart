@@ -3,12 +3,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_animations/flutter_map_animations.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
-import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:vagalivre/modules/home/components/map/components/park_details.dart';
 
-import '../controllers/map_controller.dart';
-import '../controllers/parks_search_controller.dart';
+import '../../controllers/map_controller.dart';
+import '../../controllers/parks_search_controller.dart';
+import 'components/destination_marker.dart';
+import 'components/park_details.dart';
+import 'components/park_marker.dart';
 
 class MapWidget extends StatelessWidget {
   RelativeRect? lastTapPosition;
@@ -23,21 +24,19 @@ class MapWidget extends StatelessWidget {
       builder: (context, state) {
         final List<AnimatedMarker> markers;
 
-        markerBuilder(DestinationResult result, {required ParkResult? selectedPark}) =>
-            AnimatedMarker(
+        markerBuilder(DestinationResult result, {required ParkResult? selectedPark}) => AnimatedMarker(
               width: 48,
               height: 64,
-              alignment: Alignment.topCenter,
+              alignment: result is ParkResult ? Alignment.center : Alignment.topCenter,
               point: result.location,
               builder: (context, animation) {
                 return result is ParkResult
                     ? ParkMarker(
                         park: result,
-                        onPressed: (result) => context.go("/park", extra: result),
+                        onPressed: (result) => searchController.selectPark(result),
                         selected: selectedPark == result,
                       )
-                    : DestinationMarker(
-                        destination: result, onPressed: searchController.searchParksCloseTo);
+                    : DestinationMarker(destination: result, onPressed: searchController.searchParksCloseTo);
               },
             );
 
@@ -66,21 +65,58 @@ class MapWidget extends StatelessWidget {
         ));
         final selectedParkDetails = selectedPark != null
             ? AnimatedMarker(
+                key: Key(selectedPark.label),
                 point: selectedPark.location,
                 width: 250,
-                height: 152,
+                height: 250,
                 alignment: Alignment.topCenter,
                 builder: (context, animation) {
-                  return ParkDetails(park: selectedPark);
+                  return ScaleTransition(
+                    scale: animation,
+                    alignment: Alignment(0, 0.5),
+                    child: ParkDetails(park: selectedPark),
+                  );
                 })
             : null;
-
-        final theme = Theme.of(context);
 
         return FlutterMap(
           mapController: myMapController.animatedMapsController.mapController,
           options: MapOptions(
-              initialCenter: LatLng(myMapController.userLatitude, myMapController.userLongitude)),
+            onTap: (tapPosition, point) {
+              if (selectedParkDetails != null) {
+                searchController.selectPark(null);
+              }
+            },
+            onLongPress: (TapPosition tapPosition, point) {
+              showMenu(
+                context: context,
+                position: RelativeRect.fromLTRB(
+                  tapPosition.global.dx,
+                  tapPosition.global.dy,
+                  tapPosition.global.dx,
+                  tapPosition.global.dy,
+                ),
+                items: [
+                  PopupMenuItem(
+                    child: Text("Pesquisar estacionamentos aqui"),
+                    onTap: () {
+                      searchController.searchParksCloseTo(
+                        DestinationResult(
+                          label: "Lugar apontado",
+                          address: "",
+                          location: point,
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              );
+            },
+            initialZoom: 4,
+            initialCenter: myMapController.userLatitude == 0
+                ? const LatLng(-14.235004, -51.92528)
+                : LatLng(myMapController.userLatitude, myMapController.userLongitude),
+          ),
           children: [
             TileLayer(
               urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
@@ -112,80 +148,3 @@ class MapWidget extends StatelessWidget {
     );
   }
 }
-
-class DestinationMarker extends StatelessWidget {
-  const DestinationMarker({
-    required this.destination,
-    required this.onPressed,
-    super.key,
-  });
-
-  final DestinationResult destination;
-  final void Function(DestinationResult) onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return IconButton(
-      iconSize: 48,
-      splashRadius: 56,
-      color: theme.colorScheme.error,
-      visualDensity: VisualDensity.standard,
-      isSelected: true,
-      alignment: Alignment.topCenter,
-      onPressed: () => onPressed(destination),
-      icon: const Icon(Icons.location_on_rounded),
-      selectedIcon: const Icon(Icons.add_location_alt_rounded),
-    );
-  }
-}
-
-class ParkMarker extends StatelessWidget {
-  const ParkMarker({
-    required this.park,
-    required this.onPressed,
-    required this.selected,
-    super.key,
-  });
-
-  final ParkResult park;
-  final bool selected;
-  final void Function(ParkResult) onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return IconButton.filled(
-      padding: EdgeInsets.zero,
-      visualDensity: VisualDensity.compact,
-      onPressed: () => onPressed(park),
-      color: selected ? theme.colorScheme.tertiary : theme.colorScheme.onPrimary,
-      icon: Icon(Icons.flag_circle_rounded),
-    );
-  }
-}
-
-// extension _CustomMarker on Marker {
-//   static destination(destination, VoidCallback onTap) {
-//     return Marker(
-//       visible: true,
-//       position: destination.location,
-//       markerId: MarkerId(destination.label),
-//       infoWindow: InfoWindow(
-//         title: destination.label,
-//         snippet: "Toque para encontrar estacionamentos próximos",
-//         onTap: onTap, //() => searchController.searchParksCloseTo(e),
-//       ),
-//     );
-//   }
-
-//   static park(ParkResult park, void Function() onTap) {
-//     return Marker(
-//       onTap: onTap,
-//       visible: true,
-//       position: park.location,
-//       markerId: MarkerId(park.label),
-//       icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
-//     );
-//   }

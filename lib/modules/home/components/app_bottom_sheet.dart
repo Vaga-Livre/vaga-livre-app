@@ -1,12 +1,12 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 
 import '../../../config/extension.dart';
 import '../../../utils/formatters.dart';
 import '../../../utils/initial_letters.dart';
-import '../controllers/map_controller.dart';
 import '../controllers/parks_search_controller.dart';
 
 class AppBottomSheet extends StatefulWidget {
@@ -21,6 +21,15 @@ class _AppBottomSheetState extends State<AppBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final double resultCardDesiredWidth = 400;
+    final size = MediaQuery.sizeOf(context);
+    final bottomSheetPadding = const EdgeInsets.all(16).copyWith(bottom: 0);
+
+    final cardWidth = min(
+      resultCardDesiredWidth,
+      size.width - bottomSheetPadding.horizontal - 2,
+    );
+
     return BlocConsumer<ParksSearchController, ParkSearchState>(
         listener: (context, state) {
           final hasSearchResults = state is ParksNearbyDestinationResults;
@@ -42,7 +51,7 @@ class _AppBottomSheetState extends State<AppBottomSheet> {
             firstChild: SizedBox(
               width: double.maxFinite,
               child: Padding(
-                padding: const EdgeInsets.all(16).copyWith(bottom: 0),
+                padding: bottomSheetPadding,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -70,10 +79,9 @@ class _AppBottomSheetState extends State<AppBottomSheet> {
                                 margin: const EdgeInsets.only(right: 10),
                                 clipBehavior: Clip.hardEdge,
                                 child: InkWell(
-                                  onTap: () =>
-                                      context.read<ParksSearchController>().selectPark(park),
+                                  onTap: () => context.read<ParksSearchController>().selectPark(park),
                                   child: Container(
-                                    width: 400,
+                                    width: cardWidth,
                                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -81,8 +89,7 @@ class _AppBottomSheetState extends State<AppBottomSheet> {
                                         ListTile(
                                           minVerticalPadding: 0,
                                           contentPadding: const EdgeInsets.all(0),
-                                          leading:
-                                              CircleAvatar(child: Text(initialLetters(park.label))),
+                                          leading: CircleAvatar(child: Text(initialLetters(park.label))),
                                           titleTextStyle: context.textTheme.titleMedium,
                                           title: Text(
                                             park.label,

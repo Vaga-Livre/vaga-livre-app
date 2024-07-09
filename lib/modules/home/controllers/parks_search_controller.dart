@@ -100,8 +100,7 @@ class ParksSearchController extends Cubit<ParkSearchState> with ChangeNotifier {
       final terms = _toSearchTsQuery(query);
 
       searchParks() async {
-        final List<JsonType> resultsData =
-            await _supabaseClient.from("park").select().textSearch("name", terms);
+        final List<JsonType> resultsData = await _supabaseClient.from("park").select().textSearch("name", terms);
 
         final data = resultsData.map((e) => ParkResult(
               label: e["name"],
@@ -157,8 +156,7 @@ class ParksSearchController extends Cubit<ParkSearchState> with ChangeNotifier {
                   ))
               .toList();
         } else {
-          throw Exception(
-              "Ocorreu um erro ao buscar endereços: ${addressesData["error"]["message"]}");
+          throw Exception("Ocorreu um erro ao buscar endereços: ${addressesData["error"]["message"]}");
         }
       }
 
@@ -212,8 +210,7 @@ class ParksSearchController extends Cubit<ParkSearchState> with ChangeNotifier {
     // Set destination as query Text
     queryTextController.text = destination.label;
     searchInputFocusNode.unfocus();
-    mapController
-        .focusOnAll(List.of(<DestinationResult>[destination, ...parks].map((e) => e.location)));
+    mapController.focusOnAll(List.of(<DestinationResult>[destination, ...parks].map((e) => e.location)));
     emit(ParksNearbyDestinationResults(
       query: destination.label,
       destination: destination,
@@ -224,7 +221,7 @@ class ParksSearchController extends Cubit<ParkSearchState> with ChangeNotifier {
     notifyListeners();
   }
 
-  selectPark(ParkResult park) {
+  selectPark(ParkResult? park) {
     if (state is! ParksNearbyDestinationResults) return;
     final originalState = state as ParksNearbyDestinationResults;
 
@@ -235,8 +232,9 @@ class ParksSearchController extends Cubit<ParkSearchState> with ChangeNotifier {
       selectedPark: park,
     ));
 
+    if (park != null) mapController.focusOn(park.location);
+
     searchInputFocusNode.unfocus();
-    mapController.focusOn(park.location);
 
     notifyListeners();
   }

@@ -4,14 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map_animations/flutter_map_animations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:vagalivre/modules/home/controllers/map_controller.dart';
-import 'package:vagalivre/modules/home/controllers/parks_search_controller.dart';
 
 import '../../../config/extension.dart';
 import '../components/app_bottom_sheet.dart';
-import '../components/map_widget.dart';
+import '../components/map/map_widget.dart';
 import '../components/search_bar.dart';
 import '../components/search_header.dart';
+import '../controllers/map_controller.dart';
+import '../controllers/parks_search_controller.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});

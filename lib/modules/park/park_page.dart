@@ -20,8 +20,7 @@ class ParkPage extends StatelessWidget {
 
     final hasSlots = park.slotsCount > 0;
 
-    var sectionTitleStyle =
-        textTheme.titleMedium?.copyWith(color: theme.colorScheme.onSecondaryContainer);
+    var sectionTitleStyle = textTheme.titleMedium?.copyWith(color: theme.colorScheme.onSecondaryContainer);
 
     void _showBottomSheet() {
       Navigator.push(
@@ -136,8 +135,7 @@ class _ReservationBottomSheetState extends State<_ReservationBottomSheet> {
         children: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Text("Reservar Vaga",
-                style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w500)),
+            child: Text("Reservar Vaga", style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w500)),
           ),
           _ReservationSection(
             title: const Text("Cheque o horário"),
@@ -233,8 +231,7 @@ class _ReservationBottomSheetState extends State<_ReservationBottomSheet> {
             _ReservationSection(
               title: const Text("Método de pagamento"),
               child: ListTileTheme(
-                data: const ListTileThemeData(
-                    visualDensity: VisualDensity(vertical: -4, horizontal: -4)),
+                data: const ListTileThemeData(visualDensity: VisualDensity(vertical: -4, horizontal: -4)),
                 child: FormField<PaymentMethod>(builder: (state) {
                   paymentMethodChanged(PaymentMethod? value) {
                     setState(() {
@@ -323,14 +320,12 @@ class _ReservationBottomSheetState extends State<_ReservationBottomSheet> {
                     children: [
                       Text(
                         "Total:",
-                        style: textTheme.titleMedium!
-                            .copyWith(fontSize: 18, fontWeight: FontWeight.w500),
+                        style: textTheme.titleMedium!.copyWith(fontSize: 18, fontWeight: FontWeight.w500),
                       ),
                       const SizedBox.square(dimension: 8),
                       Text(
                         currencyFormatter.format(totalPrice ?? 0),
-                        style: textTheme.titleMedium!
-                            .copyWith(fontSize: 18, fontWeight: FontWeight.w500),
+                        style: textTheme.titleMedium!.copyWith(fontSize: 18, fontWeight: FontWeight.w500),
                       ),
                     ],
                   ),
@@ -379,14 +374,11 @@ class _ReservationSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           DefaultTextStyle(
-            style: textTheme.bodyLarge!
-                .copyWith(color: theme.colorScheme.onSurfaceVariant, height: 1.75),
+            style: textTheme.bodyLarge!.copyWith(color: theme.colorScheme.onSurfaceVariant, height: 1.75),
             child: title,
           ),
           const SizedBox(height: 8),
-          DefaultTextStyle(
-              style: textTheme.bodyMedium!.copyWith(color: theme.colorScheme.onSurface),
-              child: child),
+          DefaultTextStyle(style: textTheme.bodyMedium!.copyWith(color: theme.colorScheme.onSurface), child: child),
         ],
       ),
     );

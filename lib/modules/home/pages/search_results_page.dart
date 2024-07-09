@@ -11,7 +11,7 @@ class SearchResultsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final searchController = BlocProvider.of<ParksSearchController>(context, listen: false);
+    final searchController = context.read<ParksSearchController>();
 
     return BlocBuilder<ParksSearchController, ParkSearchState>(
       bloc: searchController,
