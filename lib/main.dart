@@ -1,11 +1,16 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_map_animations/flutter_map_animations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:provider/provider.dart';
 import 'package:supabase_auth_ui/supabase_auth_ui.dart';
 
 import 'modules/auth/pages/login_page.dart';
 import 'modules/auth/pages/register_user_info_page.dart';
 import 'modules/auth/pages/splash_page.dart';
+import 'modules/home/controllers/map_controller.dart';
 import 'modules/home/controllers/parks_search_controller.dart';
 import 'modules/home/pages/home_page.dart';
 import 'modules/home/pages/search_results_page.dart';
@@ -29,16 +34,51 @@ void main() async {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
   @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> with TickerProviderStateMixin {
+  late final AnimatedMapController mapsController;
+
+  @override
+  void initState() {
+    super.initState();
+
+    mapsController = AnimatedMapController(vsync: this, duration: Durations.extralong2);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      routerConfig: _router,
-      title: 'Flutter Demo',
-      debugShowCheckedModeBanner: false,
-      theme: MaterialTheme(ThemeData.light().textTheme).light(),
+    return ChangeNotifierProvider(
+      create: (context) => MyMapController(animatedMapsController: mapsController),
+      child: ChangeNotifierProxyProvider<MyMapController, ParksSearchController>(
+        create: (context) => ParksSearchController(
+          queryTextController: TextEditingController(text: ""),
+          searchInputFocusNode: FocusNode(),
+          mapController: context.read<MyMapController>(),
+        ),
+        update: (context, value, previous) {
+          if (previous?.mapController == value) return previous!;
+
+          log("CREATING NEW PARKS SEARCH CONTROLLER");
+
+          return ParksSearchController(
+            queryTextController: TextEditingController(text: ""),
+            searchInputFocusNode: FocusNode(),
+            mapController: value,
+          );
+        },
+        child: MaterialApp.router(
+          routerConfig: _router,
+          title: 'Flutter Demo',
+          debugShowCheckedModeBanner: false,
+          theme: MaterialTheme(ThemeData.light().textTheme).light(),
+        ),
+      ),
     );
   }
 }
