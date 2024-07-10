@@ -12,9 +12,7 @@ import 'components/park_details.dart';
 import 'components/park_marker.dart';
 
 class MapWidget extends StatelessWidget {
-  RelativeRect? lastTapPosition;
-
-  MapWidget({super.key});
+  const MapWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -24,21 +22,9 @@ class MapWidget extends StatelessWidget {
       builder: (context, state) {
         final List<AnimatedMarker> markers;
 
-        markerBuilder(DestinationResult result, {required ParkResult? selectedPark}) => AnimatedMarker(
-              width: 48,
-              height: 64,
-              alignment: result is ParkResult ? Alignment.center : Alignment.topCenter,
-              point: result.location,
-              builder: (context, animation) {
-                return result is ParkResult
-                    ? ParkMarker(
-                        park: result,
-                        onPressed: (result) => searchController.selectPark(result),
-                        selected: selectedPark == result,
-                      )
-                    : DestinationMarker(destination: result, onPressed: searchController.searchParksCloseTo);
-              },
-            );
+        markerBuilder(DestinationResult result, {required ParkResult? selectedPark}) {
+          return destinationToMarker(result, searchController, selectedPark);
+        }
 
         final List<DestinationResult> results;
         switch (state) {
@@ -57,62 +43,19 @@ class MapWidget extends StatelessWidget {
         }
 
         final selectedPark = state is ParksNearbyDestinationResults ? state.selectedPark : null;
-        markers = List.of(results.map(
-          (e) => markerBuilder(
-            e,
-            selectedPark: selectedPark,
-          ),
-        ));
-        final selectedParkDetails = selectedPark != null
-            ? AnimatedMarker(
-                key: Key(selectedPark.label),
-                point: selectedPark.location,
-                width: 250,
-                height: 250,
-                alignment: Alignment.topCenter,
-                builder: (context, animation) {
-                  return ScaleTransition(
-                    scale: animation,
-                    alignment: Alignment(0, 0.5),
-                    child: ParkDetails(park: selectedPark),
-                  );
-                })
-            : null;
+
+        final selectedParkDetails =
+            selectedPark != null ? ParkDetailsAnimatedMarker(selectedPark) : null;
+
+        markers = List.of(results.map((e) => markerBuilder(e, selectedPark: selectedPark)));
 
         return FlutterMap(
           mapController: myMapController.animatedMapsController.mapController,
           options: MapOptions(
-            onTap: (tapPosition, point) {
-              if (selectedParkDetails != null) {
-                searchController.selectPark(null);
-              }
-            },
-            onLongPress: (TapPosition tapPosition, point) {
-              showMenu(
-                context: context,
-                position: RelativeRect.fromLTRB(
-                  tapPosition.global.dx,
-                  tapPosition.global.dy,
-                  tapPosition.global.dx,
-                  tapPosition.global.dy,
-                ),
-                items: [
-                  PopupMenuItem(
-                    child: Text("Pesquisar estacionamentos aqui"),
-                    onTap: () {
-                      searchController.searchParksCloseTo(
-                        DestinationResult(
-                          label: "Lugar apontado",
-                          address: "",
-                          location: point,
-                        ),
-                      );
-                    },
-                  ),
-                ],
-              );
-            },
             initialZoom: 4,
+            onTap: (tapPosition, point) => onMapTap(selectedParkDetails, searchController),
+            onLongPress: (TapPosition tapPosition, point) =>
+                onMapLongPress(context, tapPosition, searchController, point),
             initialCenter: myMapController.userLatitude == 0
                 ? const LatLng(-14.235004, -51.92528)
                 : LatLng(myMapController.userLatitude, myMapController.userLongitude),
@@ -145,6 +88,61 @@ class MapWidget extends StatelessWidget {
           ],
         );
       },
+    );
+  }
+
+  AnimatedMarker destinationToMarker(
+      DestinationResult result, ParksSearchController searchController, ParkResult? selectedPark) {
+    return AnimatedMarker(
+      width: 48,
+      height: 64,
+      alignment: result is ParkResult ? Alignment.center : Alignment.topCenter,
+      point: result.location,
+      builder: (context, animation) {
+        return result is ParkResult
+            ? ParkMarker(
+                park: result,
+                onPressed: (result) => searchController.selectPark(result),
+                selected: selectedPark == result,
+              )
+            : DestinationMarker(
+                destination: result,
+                onPressed: searchController.searchParksCloseTo,
+              );
+      },
+    );
+  }
+
+  void onMapTap(AnimatedMarker? selectedParkDetails, ParksSearchController searchController) {
+    if (selectedParkDetails != null) {
+      searchController.selectPark(null);
+    }
+  }
+
+  void onMapLongPress(BuildContext context, TapPosition tapPosition,
+      ParksSearchController searchController, LatLng point) {
+    showMenu(
+      context: context,
+      position: RelativeRect.fromLTRB(
+        tapPosition.global.dx,
+        tapPosition.global.dy,
+        tapPosition.global.dx,
+        tapPosition.global.dy,
+      ),
+      items: [
+        PopupMenuItem(
+          child: const Text("Pesquisar estacionamentos aqui"),
+          onTap: () {
+            searchController.searchParksCloseTo(
+              DestinationResult(
+                label: "Lugar apontado",
+                address: "",
+                location: point,
+              ),
+            );
+          },
+        ),
+      ],
     );
   }
 }
