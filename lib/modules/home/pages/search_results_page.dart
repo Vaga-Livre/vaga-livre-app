@@ -53,7 +53,7 @@ class SearchResultsPage extends StatelessWidget {
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Text("R\$ ${currencyFormatter.format(item.price)}/hora"),
+                              Text("${currencyFormatter.format(item.price)}/hora"),
                               const Icon(Icons.arrow_right),
                             ],
                           ),

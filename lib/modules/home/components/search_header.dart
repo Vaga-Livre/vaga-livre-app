@@ -12,6 +12,7 @@ class AppHeaderArea extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: context.colorScheme.surface,
+        boxShadow: kElevationToShadow[2],
         borderRadius: const BorderRadius.only(
           bottomLeft: Radius.circular(12),
           bottomRight: Radius.circular(12),
