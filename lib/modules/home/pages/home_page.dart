@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../config/extension.dart';
-import '../components/app_bottom_sheet.dart';
+import '../components/bottom_sheet/app_bottom_sheet.dart';
 import '../components/map/map_widget.dart';
 import '../components/search_bar.dart';
 import '../components/search_header.dart';
