@@ -52,6 +52,7 @@ class MapWidget extends StatelessWidget {
         return FlutterMap(
           mapController: myMapController.animatedMapsController.mapController,
           options: MapOptions(
+            maxZoom: 19,
             initialZoom: 4,
             onTap: (tapPosition, point) => onMapTap(selectedParkDetails, searchController),
             onLongPress: (TapPosition tapPosition, point) =>
@@ -64,6 +65,7 @@ class MapWidget extends StatelessWidget {
             TileLayer(
               urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
               userAgentPackageName: 'br.com.vagalivre.app',
+              maxZoom: 20,
             ),
             CurrentLocationLayer(
               alignPositionOnUpdate: AlignOnUpdate.once,
