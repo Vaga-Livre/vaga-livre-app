@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../config/extension.dart';
 import '../controllers/parks_search_controller.dart';
 
 class AppSearchBar extends StatefulWidget {
@@ -29,8 +30,6 @@ class _AppSearchBarState extends State<AppSearchBar> {
           final hasSuggestions = isSearching &&
               (state is DestinationsSearchResults &&
                   (state.destinations.isNotEmpty || state.suggestedParks.isNotEmpty));
-          final suggestions =
-              hasSuggestions ? [...state.suggestedParks, ...state.destinations] : [];
 
           return Column(
             children: [
@@ -82,24 +81,70 @@ class _AppSearchBarState extends State<AppSearchBar> {
                     ),
                     clipBehavior: Clip.antiAlias,
                     child: ListBody(
-                      children: List.generate(
-                        suggestions.length * 2 - 1,
-                        (i) {
-                          if (i.isEven) {
-                            final suggestion = suggestions[i ~/ 2];
+                      children: <Widget>[
+                        if (state.suggestedParks.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            child: Text("Estacionamentos", style: context.textTheme.titleMedium),
+                          ),
+                        ...state.suggestedParks.map(
+                          (suggestion) {
                             return ListTile(
-                              dense: true,
-                              // TODO :use switch to ensure exaustive checking
+                              // dense: true,
+                              leading: CircleAvatar(
+                                backgroundColor: colorScheme.surfaceContainerHighest,
+                                foregroundColor: colorScheme.onSurfaceVariant,
+                                child: const Text(
+                                  "E",
+                                  style: TextStyle(
+                                    fontSize: 26,
+                                    fontWeight: FontWeight.w900,
+                                  ),
+                                ),
+                              ),
                               title: Text(suggestion.label),
-                              onTap: () => suggestion is ParkResult
-                                  ? context.push("/park", extra: suggestion)
-                                  : searchController.searchParksCloseTo(suggestion),
+                              subtitle: Text(
+                                suggestion.address,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              trailing: const Icon(Icons.arrow_forward),
+                              onTap: () {
+                                context.push("/park", extra: suggestion);
+                              },
                             );
-                          } else {
-                            return const Divider(height: 0);
-                          }
-                        },
-                      ),
+                          },
+                        ),
+                        const Divider(height: 0),
+                        if (state.destinations.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            child: Text("Destinos", style: context.textTheme.titleMedium),
+                          ),
+                        ...state.destinations.map(
+                          (DestinationResult suggestion) {
+                            return ListTile(
+                              // dense: true,
+                              leading: CircleAvatar(
+                                backgroundColor: colorScheme.surfaceContainerHighest,
+                                foregroundColor: colorScheme.onSurfaceVariant,
+                                child: const Icon(Icons.location_on),
+                              ),
+                              title: Text(suggestion.label),
+                              subtitle: Text(
+                                suggestion.address,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              trailing: const Icon(Icons.search),
+
+                              onTap: () {
+                                searchController.searchParksCloseTo(suggestion);
+                              },
+                            );
+                          },
+                        ),
+                      ],
                     ),
                   ),
                 ),
