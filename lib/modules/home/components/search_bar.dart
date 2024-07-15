@@ -66,85 +66,87 @@ class _AppSearchBarState extends State<AppSearchBar> {
                 ],
               ),
               if (hasSuggestions)
-                SingleChildScrollView(
-                  physics: const ClampingScrollPhysics(),
-                  child: Container(
-                    decoration: ShapeDecoration(
-                      color: ElevationOverlay.colorWithOverlay(
-                          colorScheme.surface, colorScheme.surfaceTint, 2),
-                      shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.vertical(
-                          top: Radius.zero,
-                          bottom: Radius.circular(12),
+                Expanded(
+                  child: SingleChildScrollView(
+                    // physics: const ClampingScrollPhysics(),
+                    child: Container(
+                      decoration: ShapeDecoration(
+                        color: ElevationOverlay.colorWithOverlay(
+                            colorScheme.surface, colorScheme.surfaceTint, 2),
+                        shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.vertical(
+                            top: Radius.zero,
+                            bottom: Radius.circular(12),
+                          ),
                         ),
                       ),
-                    ),
-                    clipBehavior: Clip.antiAlias,
-                    child: ListBody(
-                      children: <Widget>[
-                        if (state.suggestedParks.isNotEmpty)
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            child: Text("Estacionamentos", style: context.textTheme.titleMedium),
-                          ),
-                        ...state.suggestedParks.map(
-                          (suggestion) {
-                            return ListTile(
-                              // dense: true,
-                              leading: CircleAvatar(
-                                backgroundColor: colorScheme.surfaceContainerHighest,
-                                foregroundColor: colorScheme.onSurfaceVariant,
-                                child: const Text(
-                                  "E",
-                                  style: TextStyle(
-                                    fontSize: 26,
-                                    fontWeight: FontWeight.w900,
+                      clipBehavior: Clip.antiAlias,
+                      child: ListBody(
+                        children: <Widget>[
+                          if (state.suggestedParks.isNotEmpty)
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              child: Text("Estacionamentos", style: context.textTheme.titleMedium),
+                            ),
+                          ...state.suggestedParks.map(
+                            (suggestion) {
+                              return ListTile(
+                                // dense: true,
+                                leading: CircleAvatar(
+                                  backgroundColor: colorScheme.surfaceContainerHighest,
+                                  foregroundColor: colorScheme.onSurfaceVariant,
+                                  child: const Text(
+                                    "E",
+                                    style: TextStyle(
+                                      fontSize: 26,
+                                      fontWeight: FontWeight.w900,
+                                    ),
                                   ),
                                 ),
-                              ),
-                              title: Text(suggestion.label),
-                              subtitle: Text(
-                                suggestion.address,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              trailing: const Icon(Icons.arrow_forward),
-                              onTap: () {
-                                context.push("/park", extra: suggestion);
-                              },
-                            );
-                          },
-                        ),
-                        const Divider(height: 0),
-                        if (state.destinations.isNotEmpty)
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            child: Text("Destinos", style: context.textTheme.titleMedium),
+                                title: Text(suggestion.label),
+                                subtitle: Text(
+                                  suggestion.address,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                trailing: const Icon(Icons.arrow_forward),
+                                onTap: () {
+                                  context.push("/park", extra: suggestion);
+                                },
+                              );
+                            },
                           ),
-                        ...state.destinations.map(
-                          (DestinationResult suggestion) {
-                            return ListTile(
-                              // dense: true,
-                              leading: CircleAvatar(
-                                backgroundColor: colorScheme.surfaceContainerHighest,
-                                foregroundColor: colorScheme.onSurfaceVariant,
-                                child: const Icon(Icons.location_on),
-                              ),
-                              title: Text(suggestion.label),
-                              subtitle: Text(
-                                suggestion.address,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              trailing: const Icon(Icons.search),
+                          const Divider(height: 0),
+                          if (state.destinations.isNotEmpty)
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              child: Text("Destinos", style: context.textTheme.titleMedium),
+                            ),
+                          ...state.destinations.map(
+                            (DestinationResult suggestion) {
+                              return ListTile(
+                                // dense: true,
+                                leading: CircleAvatar(
+                                  backgroundColor: colorScheme.surfaceContainerHighest,
+                                  foregroundColor: colorScheme.onSurfaceVariant,
+                                  child: const Icon(Icons.location_on),
+                                ),
+                                title: Text(suggestion.label),
+                                subtitle: Text(
+                                  suggestion.address,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                trailing: const Icon(Icons.search),
 
-                              onTap: () {
-                                searchController.searchParksCloseTo(suggestion);
-                              },
-                            );
-                          },
-                        ),
-                      ],
+                                onTap: () {
+                                  searchController.searchParksCloseTo(suggestion);
+                                },
+                              );
+                            },
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
