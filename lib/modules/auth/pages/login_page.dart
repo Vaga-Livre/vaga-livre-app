@@ -110,10 +110,10 @@ class _LoginPageState extends State<LoginPage> {
 
   void checkUserMetadataAndNavigate(AuthResponse response, BuildContext context) {
     Map<String, dynamic> currentUserMetadata = response.user!.appMetadata;
-    if (currentUserMetadata[LoginPage.completedSignUpFlag] == false) {
-      context.go('/user-info');
-    } else {
+    if (currentUserMetadata[LoginPage.completedSignUpFlag] == true) {
       context.go('/');
+    } else {
+      context.go('/user-info');
     }
   }
 }
