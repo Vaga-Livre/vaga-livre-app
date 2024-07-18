@@ -18,15 +18,18 @@ class DestinationResult {
   final String address;
   final LatLng location;
 
-  const DestinationResult({required this.label, required this.address, required this.location});
+  const DestinationResult(
+      {required this.label, required this.address, required this.location});
 }
 
 class ParkResult extends DestinationResult {
+  final int id;
   final String description;
   final int slotsCount;
   final double price;
 
   const ParkResult({
+    required this.id,
     required super.label,
     required super.address,
     required super.location,
@@ -100,13 +103,18 @@ class ParksSearchController extends Cubit<ParkSearchState> with ChangeNotifier {
       final terms = _toSearchTsQuery(query);
 
       searchParks() async {
-        final List<JsonType> resultsData = await _supabaseClient.from("park").select().textSearch("name", terms);
+        final List<JsonType> resultsData = await _supabaseClient
+            .from("park")
+            .select()
+            .textSearch("name", terms);
 
         final data = resultsData.map((e) => ParkResult(
+              id: e["id"],
               label: e["name"],
               address: e["address_line"],
               description: (e["description"] as String).replaceAll("\\n", '\n'),
-              location: LatLng(double.parse(e["latitude"]), double.parse(e["longitude"])),
+              location: LatLng(
+                  double.parse(e["latitude"]), double.parse(e["longitude"])),
               slotsCount: 0,
               price: (e["hourly_rate"] as num).toDouble(),
             ));
@@ -156,7 +164,8 @@ class ParksSearchController extends Cubit<ParkSearchState> with ChangeNotifier {
                   ))
               .toList();
         } else {
-          throw Exception("Ocorreu um erro ao buscar endereços: ${addressesData["error"]["message"]}");
+          throw Exception(
+              "Ocorreu um erro ao buscar endereços: ${addressesData["error"]["message"]}");
         }
       }
 
@@ -167,7 +176,8 @@ class ParksSearchController extends Cubit<ParkSearchState> with ChangeNotifier {
         searchAddresses(),
       ]).catchError(
         (error, stackTrace) {
-          log("Error on search recommendation", error: error, stackTrace: stackTrace);
+          log("Error on search recommendation",
+              error: error, stackTrace: stackTrace);
           return [];
         },
       );
@@ -198,10 +208,12 @@ class ParksSearchController extends Cubit<ParkSearchState> with ChangeNotifier {
 
     final parks = resultsData
         .map((e) => ParkResult(
+              id: e["id"],
               label: e["name"],
               address: e["address_line"],
               description: e["description"],
-              location: LatLng(double.parse(e["latitude"]), double.parse(e["longitude"])),
+              location: LatLng(
+                  double.parse(e["latitude"]), double.parse(e["longitude"])),
               slotsCount: 0,
               price: (e["hourly_rate"] as num).toDouble(),
             ))
@@ -210,7 +222,8 @@ class ParksSearchController extends Cubit<ParkSearchState> with ChangeNotifier {
     // Set destination as query Text
     queryTextController.text = destination.label;
     searchInputFocusNode.unfocus();
-    mapController.focusOnAll(List.of(<DestinationResult>[destination, ...parks].map((e) => e.location)));
+    mapController.focusOnAll(List.of(
+        <DestinationResult>[destination, ...parks].map((e) => e.location)));
     emit(ParksNearbyDestinationResults(
       query: destination.label,
       destination: destination,
@@ -275,7 +288,8 @@ class DestinationsSearchResults extends ParkSearchState {
   final List<ParkResult> suggestedParks;
   final List<DestinationResult> destinations;
 
-  DestinationsSearchResults({required this.suggestedParks, required this.destinations});
+  DestinationsSearchResults(
+      {required this.suggestedParks, required this.destinations});
 }
 
 /// Map without any search should show the available parks in the map view
