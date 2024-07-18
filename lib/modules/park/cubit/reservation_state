@@ -1,0 +1,16 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+abstract class ReservationState {}
+
+class InitialReservationState extends ReservationState {}
+
+class ReservationLoadingState extends ReservationState {}
+
+class ReservationConfirmedState extends ReservationState {}
+
+class ReservationFailedState extends ReservationState {
+  final String message;
+
+  ReservationFailedState({required this.message});
+}
