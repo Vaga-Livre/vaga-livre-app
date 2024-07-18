@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:vagalivre/modules/park/enums/payment_method.dart';
@@ -14,7 +12,7 @@ class ParkSlotsService {
     final formattedStartTime = "${beginTime.hour}:${beginTime.minute}:00";
     final formattedEndTime = "${endTime.hour}:${endTime.minute}:00";
 
-    final response = await _supabaseClient.rpc('create_reservation', params: {
+    await _supabaseClient.rpc('create_reservation', params: {
       'park_id': parkId,
       'start_time': formattedStartTime,
       'end_time': formattedEndTime,
