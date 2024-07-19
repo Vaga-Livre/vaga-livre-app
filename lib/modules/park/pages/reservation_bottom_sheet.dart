@@ -2,107 +2,28 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:vagalivre/modules/park/cubit/reservation_cubit.dart';
-import 'package:vagalivre/modules/park/cubit/reservation_state';
-import 'package:vagalivre/modules/park/enums/payment_method.dart';
-import 'package:vagalivre/modules/park/services/park_slots_service.dart';
+import 'package:vagalivre/utils/toast_message.dart';
 
-import '../../utils/formatters.dart';
-import '../home/controllers/parks_search_controller.dart';
-import 'components/hour_selection_chip.dart';
+import '../../../utils/formatters.dart';
+import '../components/hour_selection_chip.dart';
+import '../cubit/reservation_state';
+import '../enums/payment_method.dart';
+import '../../home/models/park_result.dart';
+import '../services/park_slots_service.dart';
+import '../components/reservation_section.dart';
 
-class ParkPage extends StatelessWidget {
-  const ParkPage({super.key, required this.park});
-
-  final ParkResult park;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final textTheme = theme.textTheme;
-    final today = DateTime.now();
-
-    final hasSlots = park.slotsCount > 0;
-
-    var sectionTitleStyle = textTheme.titleMedium
-        ?.copyWith(color: theme.colorScheme.onSecondaryContainer);
-
-    void _showBottomSheet() {
-      Navigator.push(
-        context,
-        ModalBottomSheetRoute(
-          isScrollControlled: true,
-          showDragHandle: true,
-          builder: (context) => _ReservationBottomSheet(park: park),
-        ),
-      );
-    }
-
-    return Scaffold(
-      appBar: AppBar(title: Text(park.label)),
-      body: DefaultTextStyle(
-        style: TextStyle(color: theme.colorScheme.onSurface),
-        child: ListView(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          children: [
-            SizedBox.fromSize(
-              size: const Size.fromHeight(180),
-              child: const Placeholder(),
-            ),
-            Text(park.label,
-                style: textTheme.titleLarge
-                    ?.copyWith(fontWeight: FontWeight.w500)),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  "${weekdayFormatter.format(today).toCapitalized()}: "
-                  "${currencyFormatter.format(park.price)} por hora",
-                  style: const TextStyle(fontWeight: FontWeight.w500),
-                ),
-                FilledButton(
-                  onPressed: _showBottomSheet,
-                  child: const Text("Reservar Vaga"),
-                ),
-              ],
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text("Descrição", style: sectionTitleStyle),
-                Text(park.description, style: textTheme.bodyMedium),
-              ],
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text("Contatos", style: sectionTitleStyle),
-                const Text("Informações de contato indisponíveis"),
-              ],
-            ),
-          ]
-              .expand(
-                  (element) => [element, const SizedBox.square(dimension: 16)])
-              .toList(),
-        ),
-      ),
-    );
-  }
-}
-
-class _ReservationBottomSheet extends StatefulWidget {
-  const _ReservationBottomSheet({super.key, required this.park});
+class ReservationBottomSheet extends StatefulWidget {
+  const ReservationBottomSheet({super.key, required this.park});
 
   final ParkResult park;
 
   @override
-  State<_ReservationBottomSheet> createState() =>
-      _ReservationBottomSheetState();
+  State<ReservationBottomSheet> createState() => _ReservationBottomSheetState();
 }
 
-class _ReservationBottomSheetState extends State<_ReservationBottomSheet> {
+class _ReservationBottomSheetState extends State<ReservationBottomSheet> {
   static final DateFormat shortHourFormat = DateFormat("HH:mm");
 
   final _formKey = GlobalKey<FormState>();
@@ -117,52 +38,12 @@ class _ReservationBottomSheetState extends State<_ReservationBottomSheet> {
 
   bool foo = false;
 
-  late FToast fToast;
+  late ToastMessage toastMessage;
 
   @override
   void initState() {
     super.initState();
-    fToast = FToast();
-    // if you want to use context from globally instead of content we need to pass navigatorKey.currentContext!
-    fToast.init(context);
-  }
-
-  _showToast() {
-    Widget toast = Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(25.0),
-        color: Colors.greenAccent,
-      ),
-      child: const Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.check),
-          SizedBox(
-            width: 12.0,
-          ),
-          Text("Reserva realizada com sucesso!"),
-        ],
-      ),
-    );
-
-    fToast.showToast(
-      child: toast,
-      gravity: ToastGravity.BOTTOM,
-      toastDuration: const Duration(seconds: 2),
-    );
-
-    // Custom Toast Position
-    fToast.showToast(
-        child: toast,
-        toastDuration: const Duration(seconds: 2),
-        positionedToastBuilder: (context, child) {
-          return Positioned(
-            top: 16.0,
-            left: 16.0,
-            child: child,
-          );
-        });
+    toastMessage = ToastMessage(context);
   }
 
   final ParkSlotsService parkSlotsService = ParkSlotsService();
@@ -206,7 +87,7 @@ class _ReservationBottomSheetState extends State<_ReservationBottomSheet> {
               ..pop()
               ..pop()
               ..pop();
-            _showToast();
+            toastMessage.showSucess("Reserva realizada com sucesso!");
           } else if (state is ReservationFailedState) {
             Navigator.of(context)
               ..pop()
@@ -236,7 +117,7 @@ class _ReservationBottomSheetState extends State<_ReservationBottomSheet> {
                         style: textTheme.titleLarge
                             ?.copyWith(fontWeight: FontWeight.w500)),
                   ),
-                  _ReservationSection(
+                  ReservationSection(
                     title: const Text("Cheque o horário"),
                     child: Column(
                       children: [
@@ -330,7 +211,7 @@ class _ReservationBottomSheetState extends State<_ReservationBottomSheet> {
                   ),
                   // Método de pagamento
                   if (!foo)
-                    _ReservationSection(
+                    ReservationSection(
                       title: const Text("Método de pagamento"),
                       child: ListTileTheme(
                         data: const ListTileThemeData(
@@ -390,7 +271,7 @@ class _ReservationBottomSheetState extends State<_ReservationBottomSheet> {
                         }),
                       ),
                     ),
-                  _ReservationSection(
+                  ReservationSection(
                     title: const Text("Resumo da reserva"),
                     child: DefaultTextStyle(
                       style: textTheme.bodyMedium!.copyWith(height: 1.75),
@@ -463,47 +344,6 @@ class _ReservationBottomSheetState extends State<_ReservationBottomSheet> {
             );
           },
         ),
-      ),
-    );
-  }
-}
-
-class _ReservationSection extends StatelessWidget {
-  const _ReservationSection(
-      {super.key, required this.title, required this.child});
-
-  final Widget title;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final textTheme = theme.textTheme;
-
-    return Container(
-      padding: const EdgeInsets.all(8),
-      margin: const EdgeInsets.all(8),
-      decoration: ShapeDecoration(
-        color: theme.colorScheme.surfaceContainerLowest,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          DefaultTextStyle(
-            style: textTheme.bodyLarge!.copyWith(
-                color: theme.colorScheme.onSurfaceVariant, height: 1.75),
-            child: title,
-          ),
-          const SizedBox(height: 8),
-          DefaultTextStyle(
-              style: textTheme.bodyMedium!
-                  .copyWith(color: theme.colorScheme.onSurface),
-              child: child),
-        ],
       ),
     );
   }
