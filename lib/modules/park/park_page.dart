@@ -1,7 +1,13 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
+import 'package:vagalivre/modules/park/cubit/reservation_cubit.dart';
+import 'package:vagalivre/modules/park/cubit/reservation_state';
+import 'package:vagalivre/modules/park/enums/payment_method.dart';
+import 'package:vagalivre/modules/park/services/park_slots_service.dart';
 
 import '../../utils/formatters.dart';
 import '../home/controllers/parks_search_controller.dart';
@@ -20,7 +26,8 @@ class ParkPage extends StatelessWidget {
 
     final hasSlots = park.slotsCount > 0;
 
-    var sectionTitleStyle = textTheme.titleMedium?.copyWith(color: theme.colorScheme.onSecondaryContainer);
+    var sectionTitleStyle = textTheme.titleMedium
+        ?.copyWith(color: theme.colorScheme.onSecondaryContainer);
 
     void _showBottomSheet() {
       Navigator.push(
@@ -44,7 +51,9 @@ class ParkPage extends StatelessWidget {
               size: const Size.fromHeight(180),
               child: const Placeholder(),
             ),
-            Text(park.label, style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w500)),
+            Text(park.label,
+                style: textTheme.titleLarge
+                    ?.copyWith(fontWeight: FontWeight.w500)),
             Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -73,14 +82,15 @@ class ParkPage extends StatelessWidget {
                 const Text("Informações de contato indisponíveis"),
               ],
             ),
-          ].expand((element) => [element, const SizedBox.square(dimension: 16)]).toList(),
+          ]
+              .expand(
+                  (element) => [element, const SizedBox.square(dimension: 16)])
+              .toList(),
         ),
       ),
     );
   }
 }
-
-enum PaymentMethod { creditCard, pix, cash }
 
 class _ReservationBottomSheet extends StatefulWidget {
   const _ReservationBottomSheet({super.key, required this.park});
@@ -88,7 +98,8 @@ class _ReservationBottomSheet extends StatefulWidget {
   final ParkResult park;
 
   @override
-  State<_ReservationBottomSheet> createState() => _ReservationBottomSheetState();
+  State<_ReservationBottomSheet> createState() =>
+      _ReservationBottomSheetState();
 }
 
 class _ReservationBottomSheetState extends State<_ReservationBottomSheet> {
@@ -106,14 +117,67 @@ class _ReservationBottomSheetState extends State<_ReservationBottomSheet> {
 
   bool foo = false;
 
+  late FToast fToast;
+
+  @override
+  void initState() {
+    super.initState();
+    fToast = FToast();
+    // if you want to use context from globally instead of content we need to pass navigatorKey.currentContext!
+    fToast.init(context);
+  }
+
+  _showToast() {
+    Widget toast = Container(
+      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(25.0),
+        color: Colors.greenAccent,
+      ),
+      child: const Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.check),
+          SizedBox(
+            width: 12.0,
+          ),
+          Text("Reserva realizada com sucesso!"),
+        ],
+      ),
+    );
+
+    fToast.showToast(
+      child: toast,
+      gravity: ToastGravity.BOTTOM,
+      toastDuration: const Duration(seconds: 2),
+    );
+
+    // Custom Toast Position
+    fToast.showToast(
+        child: toast,
+        toastDuration: const Duration(seconds: 2),
+        positionedToastBuilder: (context, child) {
+          return Positioned(
+            top: 16.0,
+            left: 16.0,
+            child: child,
+          );
+        });
+  }
+
+  final ParkSlotsService parkSlotsService = ParkSlotsService();
+
   void calculatePrice() {
     final now = DateTime.now();
-    final begin = DateTime(now.year, now.month, now.day, beginTime.hour, beginTime.minute);
-    final end = DateTime(now.year, now.month, now.day, endTime.hour, endTime.minute);
+    final begin = DateTime(
+        now.year, now.month, now.day, beginTime.hour, beginTime.minute);
+    final end =
+        DateTime(now.year, now.month, now.day, endTime.hour, endTime.minute);
 
     duration = end.difference(begin);
 
-    totalPrice = (duration!.inMinutes / TimeOfDay.minutesPerHour) * widget.park.price;
+    totalPrice =
+        (duration!.inMinutes / TimeOfDay.minutesPerHour) * widget.park.price;
   }
 
   @override
@@ -121,236 +185,292 @@ class _ReservationBottomSheetState extends State<_ReservationBottomSheet> {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
 
-    return Form(
-      key: _formKey,
-      autovalidateMode: AutovalidateMode.always,
-      onChanged: () {
-        if (_formKey.currentState!.validate()) {
-          calculatePrice();
-        }
-      },
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Text("Reservar Vaga", style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w500)),
-          ),
-          _ReservationSection(
-            title: const Text("Cheque o horário"),
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text("Previsão de entrada:"),
-                    FormField(
-                      initialValue: beginTime,
-                      validator: (value) {
-                        if (value == null) {
-                          return "Insira uma hora";
-                        }
-
-                        if (value == endTime) {
-                          return "Insira uma hora diferente";
-                        }
-
-                        return null;
-                      },
-                      builder: (state) {
-                        return HourSelectionChip(
-                          time: state.value,
-                          error: state.errorText,
-                          onSelected: (value) {
-                            log(value.toString());
-
-                            if (value == null) {
-                              return;
-                            }
-
-                            setState(() {
-                              beginTime = value;
-                              state.didChange(beginTime);
-                            });
-                          },
-                        );
-                      },
-                    ),
-                  ],
-                ),
-                Divider(height: 4, color: theme.colorScheme.onInverseSurface),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text("Previsão de saída:"),
-                    FormField(
-                      initialValue: beginTime,
-                      validator: (value) {
-                        if (value == null) {
-                          return "Insira uma hora";
-                        }
-
-                        if (value == beginTime) {
-                          return "Insira uma hora diferente";
-                        }
-
-                        if (value.hour < beginTime.hour ||
-                            (value.hour == beginTime.hour && value.minute < beginTime.minute)) {
-                          return "A saída não pode ser antes da entrada";
-                        }
-
-                        return null;
-                      },
-                      builder: (state) {
-                        return HourSelectionChip(
-                          time: state.value,
-                          error: state.errorText,
-                          onSelected: (value) {
-                            log(value.toString());
-
-                            if (value == null) {
-                              return;
-                            }
-
-                            setState(() {
-                              endTime = value;
-                              state.didChange(endTime);
-                            });
-                          },
-                        );
-                      },
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          // Método de pagamento
-          if (!foo)
-            _ReservationSection(
-              title: const Text("Método de pagamento"),
-              child: ListTileTheme(
-                data: const ListTileThemeData(visualDensity: VisualDensity(vertical: -4, horizontal: -4)),
-                child: FormField<PaymentMethod>(builder: (state) {
-                  paymentMethodChanged(PaymentMethod? value) {
-                    setState(() {
-                      state.didChange(value);
-                      paymentMethod = value ?? PaymentMethod.values.first;
-                    });
-                  }
-
-                  return Column(
-                    children: [
-                      RadioListTile.adaptive(
-                        value: PaymentMethod.pix,
-                        groupValue: paymentMethod,
-                        onChanged: paymentMethodChanged,
-                        title: const Row(
-                          children: [
-                            Icon(Icons.pix),
-                            SizedBox.square(dimension: 8),
-                            Text("PIX"),
-                          ],
-                        ),
-                      ),
-                      const Divider(height: 0, indent: 16),
-                      RadioListTile.adaptive(
-                        value: PaymentMethod.creditCard,
-                        groupValue: paymentMethod,
-                        onChanged: paymentMethodChanged,
-                        title: const Row(
-                          children: [
-                            Icon(Icons.credit_card),
-                            SizedBox.square(dimension: 8),
-                            Text("Cartão de crédito"),
-                          ],
-                        ),
-                      ),
-                      const Divider(height: 0, indent: 16),
-                      RadioListTile.adaptive(
-                        value: PaymentMethod.cash,
-                        groupValue: paymentMethod,
-                        onChanged: paymentMethodChanged,
-                        title: const Row(
-                          children: [
-                            Icon(Icons.money),
-                            SizedBox.square(dimension: 8),
-                            Text("Dinheiro em espécie"),
-                          ],
-                        ),
-                      ),
-                    ],
-                  );
-                }),
-              ),
-            ),
-          _ReservationSection(
-            title: const Text("Resumo da reserva"),
-            child: DefaultTextStyle(
-              style: textTheme.bodyMedium!.copyWith(height: 1.75),
+    return BlocProvider(
+      create: (context) => ReservationCubit(
+          ParkSlotsService()), // Supondo que você injete o serviço aqui
+      child: BlocListener<ReservationCubit, ReservationState>(
+        listener: (context, state) {
+          if (state is ReservationLoadingState) {
+            // Exibir um indicador de carregamento
+            showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder: (context) {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              },
+            );
+          } else if (state is ReservationConfirmedState) {
+            Navigator.of(context)
+              ..pop()
+              ..pop()
+              ..pop();
+            _showToast();
+          } else if (state is ReservationFailedState) {
+            Navigator.of(context)
+              ..pop()
+              ..pop();
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(state.message)),
+            );
+          }
+        },
+        child: Builder(
+          builder: (context) {
+            return Form(
+              key: _formKey,
+              autovalidateMode: AutovalidateMode.always,
+              onChanged: () {
+                if (_formKey.currentState!.validate()) {
+                  calculatePrice();
+                }
+              },
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text("Duração:"),
-                      const SizedBox.square(dimension: 8),
-                      Text(
-                        shortHourFormat.format(
-                          DateTime.fromMillisecondsSinceEpoch(
-                            duration?.inMilliseconds ?? 0,
-                            isUtc: true,
-                          ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Text("Reservar Vaga",
+                        style: textTheme.titleLarge
+                            ?.copyWith(fontWeight: FontWeight.w500)),
+                  ),
+                  _ReservationSection(
+                    title: const Text("Cheque o horário"),
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text("Previsão de entrada:"),
+                            FormField(
+                              initialValue: beginTime,
+                              validator: (value) {
+                                if (value == null) {
+                                  return "Insira uma hora";
+                                }
+
+                                if (value == endTime) {
+                                  return "Insira uma hora diferente";
+                                }
+
+                                return null;
+                              },
+                              builder: (state) {
+                                return HourSelectionChip(
+                                  time: state.value,
+                                  error: state.errorText,
+                                  onSelected: (value) {
+                                    log(value.toString());
+
+                                    if (value == null) {
+                                      return;
+                                    }
+
+                                    setState(() {
+                                      beginTime = value;
+                                      state.didChange(beginTime);
+                                    });
+                                  },
+                                );
+                              },
+                            ),
+                          ],
                         ),
-                      ),
-                    ],
+                        Divider(
+                            height: 4,
+                            color: theme.colorScheme.onInverseSurface),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text("Previsão de saída:"),
+                            FormField(
+                              initialValue: beginTime,
+                              validator: (value) {
+                                if (value == null) {
+                                  return "Insira uma hora";
+                                }
+
+                                if (value == beginTime) {
+                                  return "Insira uma hora diferente";
+                                }
+
+                                if (value.hour < beginTime.hour ||
+                                    (value.hour == beginTime.hour &&
+                                        value.minute < beginTime.minute)) {
+                                  return "A saída não pode ser antes da entrada";
+                                }
+
+                                return null;
+                              },
+                              builder: (state) {
+                                return HourSelectionChip(
+                                  time: state.value,
+                                  error: state.errorText,
+                                  onSelected: (value) {
+                                    log(value.toString());
+
+                                    if (value == null) {
+                                      return;
+                                    }
+
+                                    setState(() {
+                                      endTime = value;
+                                      state.didChange(endTime);
+                                    });
+                                  },
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text("Valor por hora:"),
-                      const SizedBox.square(dimension: 8),
-                      Text(currencyFormatter.format(widget.park.price)),
-                    ],
+                  // Método de pagamento
+                  if (!foo)
+                    _ReservationSection(
+                      title: const Text("Método de pagamento"),
+                      child: ListTileTheme(
+                        data: const ListTileThemeData(
+                            visualDensity:
+                                VisualDensity(vertical: -4, horizontal: -4)),
+                        child: FormField<PaymentMethod>(builder: (state) {
+                          paymentMethodChanged(PaymentMethod? value) {
+                            setState(() {
+                              state.didChange(value);
+                              paymentMethod =
+                                  value ?? PaymentMethod.values.first;
+                            });
+                          }
+
+                          return Column(
+                            children: [
+                              RadioListTile.adaptive(
+                                value: PaymentMethod.pix,
+                                groupValue: paymentMethod,
+                                onChanged: paymentMethodChanged,
+                                title: const Row(
+                                  children: [
+                                    Icon(Icons.pix),
+                                    SizedBox.square(dimension: 8),
+                                    Text("PIX"),
+                                  ],
+                                ),
+                              ),
+                              const Divider(height: 0, indent: 16),
+                              RadioListTile.adaptive(
+                                value: PaymentMethod.creditCard,
+                                groupValue: paymentMethod,
+                                onChanged: paymentMethodChanged,
+                                title: const Row(
+                                  children: [
+                                    Icon(Icons.credit_card),
+                                    SizedBox.square(dimension: 8),
+                                    Text("Cartão de crédito"),
+                                  ],
+                                ),
+                              ),
+                              const Divider(height: 0, indent: 16),
+                              RadioListTile.adaptive(
+                                value: PaymentMethod.cash,
+                                groupValue: paymentMethod,
+                                onChanged: paymentMethodChanged,
+                                title: const Row(
+                                  children: [
+                                    Icon(Icons.money),
+                                    SizedBox.square(dimension: 8),
+                                    Text("Dinheiro em espécie"),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          );
+                        }),
+                      ),
+                    ),
+                  _ReservationSection(
+                    title: const Text("Resumo da reserva"),
+                    child: DefaultTextStyle(
+                      style: textTheme.bodyMedium!.copyWith(height: 1.75),
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text("Duração:"),
+                              const SizedBox.square(dimension: 8),
+                              Text(
+                                shortHourFormat.format(
+                                  DateTime.fromMillisecondsSinceEpoch(
+                                    duration?.inMilliseconds ?? 0,
+                                    isUtc: true,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text("Valor por hora:"),
+                              const SizedBox.square(dimension: 8),
+                              Text(currencyFormatter.format(widget.park.price)),
+                            ],
+                          ),
+                          const Divider(height: 4),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                "Total:",
+                                style: textTheme.titleMedium!.copyWith(
+                                    fontSize: 18, fontWeight: FontWeight.w500),
+                              ),
+                              const SizedBox.square(dimension: 8),
+                              Text(
+                                currencyFormatter.format(totalPrice ?? 0),
+                                style: textTheme.titleMedium!.copyWith(
+                                    fontSize: 18, fontWeight: FontWeight.w500),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                  const Divider(height: 4),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Total:",
-                        style: textTheme.titleMedium!.copyWith(fontSize: 18, fontWeight: FontWeight.w500),
+                  SizedBox(
+                    width: double.infinity,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: FilledButton(
+                        onPressed: totalPrice != null
+                            ? () {
+                                context.read<ReservationCubit>().reserveSlot(
+                                    widget.park.id,
+                                    beginTime,
+                                    endTime,
+                                    paymentMethod);
+                              }
+                            : null,
+                        child: const Text("Reservar Vaga"),
                       ),
-                      const SizedBox.square(dimension: 8),
-                      Text(
-                        currencyFormatter.format(totalPrice ?? 0),
-                        style: textTheme.titleMedium!.copyWith(fontSize: 18, fontWeight: FontWeight.w500),
-                      ),
-                    ],
+                    ),
                   ),
                 ],
               ),
-            ),
-          ),
-          SizedBox(
-            width: double.infinity,
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: FilledButton(
-                onPressed: totalPrice != null ? () {} : null,
-                child: const Text("Reservar Vaga"),
-              ),
-            ),
-          ),
-        ],
+            );
+          },
+        ),
       ),
     );
   }
 }
 
 class _ReservationSection extends StatelessWidget {
-  const _ReservationSection({super.key, required this.title, required this.child});
+  const _ReservationSection(
+      {super.key, required this.title, required this.child});
 
   final Widget title;
   final Widget child;
@@ -374,11 +494,15 @@ class _ReservationSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           DefaultTextStyle(
-            style: textTheme.bodyLarge!.copyWith(color: theme.colorScheme.onSurfaceVariant, height: 1.75),
+            style: textTheme.bodyLarge!.copyWith(
+                color: theme.colorScheme.onSurfaceVariant, height: 1.75),
             child: title,
           ),
           const SizedBox(height: 8),
-          DefaultTextStyle(style: textTheme.bodyMedium!.copyWith(color: theme.colorScheme.onSurface), child: child),
+          DefaultTextStyle(
+              style: textTheme.bodyMedium!
+                  .copyWith(color: theme.colorScheme.onSurface),
+              child: child),
         ],
       ),
     );
