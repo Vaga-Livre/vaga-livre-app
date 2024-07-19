@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../controllers/parks_search_controller.dart';
+import '../../../models/destination_result.dart';
 
 class DestinationMarker extends StatelessWidget {
   const DestinationMarker({

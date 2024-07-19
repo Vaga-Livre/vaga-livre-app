@@ -11,33 +11,9 @@ import '../../../utils/cached_http_client.dart';
 import '../../../utils/debouncer.dart';
 import '../../../utils/object_box.dart';
 import '../../../utils/typedefs.dart';
+import '../models/park_result.dart';
+import '../models/destination_result.dart';
 import 'map_controller.dart';
-
-class DestinationResult {
-  final String label;
-  final String address;
-  final LatLng location;
-
-  const DestinationResult(
-      {required this.label, required this.address, required this.location});
-}
-
-class ParkResult extends DestinationResult {
-  final int id;
-  final String description;
-  final int slotsCount;
-  final double price;
-
-  const ParkResult({
-    required this.id,
-    required super.label,
-    required super.address,
-    required super.location,
-    required this.description,
-    required this.slotsCount,
-    required this.price,
-  });
-}
 
 class ParksSearchController extends Cubit<ParkSearchState> with ChangeNotifier {
   final MyMapController mapController;

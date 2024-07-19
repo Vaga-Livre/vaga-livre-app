@@ -5,6 +5,8 @@ import 'package:vagalivre/modules/home/controllers/parks_search_controller.dart'
 import 'package:vagalivre/utils/formatters.dart';
 import 'package:vagalivre/utils/initial_letters.dart';
 
+import '../../models/park_result.dart';
+
 class ParkResultCard extends StatelessWidget {
   const ParkResultCard({
     super.key,

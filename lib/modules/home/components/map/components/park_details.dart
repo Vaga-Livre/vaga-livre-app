@@ -6,7 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:vector_math/vector_math_64.dart' show Vector3;
 
 import '../../../../../utils/formatters.dart';
-import '../../../controllers/parks_search_controller.dart';
+import '../../../models/park_result.dart';
 
 class ParkDetailsAnimatedMarker extends AnimatedMarker {
   ParkDetailsAnimatedMarker(ParkResult selectedPark)
@@ -59,14 +59,16 @@ class ParkDetails extends StatelessWidget {
                   children: [
                     Text(
                       park.label,
-                      style: theme.textTheme.titleMedium?.copyWith(color: foregroundColor),
+                      style: theme.textTheme.titleMedium
+                          ?.copyWith(color: foregroundColor),
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
                           "Valor: ${currencyFormatter.format(park.price)}",
-                          style: theme.textTheme.labelMedium?.copyWith(color: foregroundColor),
+                          style: theme.textTheme.labelMedium
+                              ?.copyWith(color: foregroundColor),
                         ),
                         Text(switch (park.slotsCount) {
                           1 => "1 espaço",
@@ -103,7 +105,8 @@ class ParkDetails extends StatelessWidget {
               child: Container(
                 width: 20,
                 height: 20,
-                decoration: BoxDecoration(color: backgroundColor, boxShadow: kElevationToShadow[2]),
+                decoration: BoxDecoration(
+                    color: backgroundColor, boxShadow: kElevationToShadow[2]),
               ),
             ),
           ),

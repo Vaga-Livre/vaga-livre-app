@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../utils/formatters.dart';
 import '../../../utils/initial_letters.dart';
+import '../models/park_result.dart';
 import '../controllers/parks_search_controller.dart';
 
 class SearchResultsPage extends StatelessWidget {
@@ -37,7 +38,8 @@ class SearchResultsPage extends StatelessWidget {
               : parks.isEmpty
                   ? const Center(child: Text("Nenhum resultado encontrado"))
                   : ListView.separated(
-                      separatorBuilder: (context, index) => const Divider(height: 0),
+                      separatorBuilder: (context, index) =>
+                          const Divider(height: 0),
                       itemCount: parks.length,
                       itemBuilder: (context, index) {
                         final ParkResult item = parks[index];
@@ -53,7 +55,8 @@ class SearchResultsPage extends StatelessWidget {
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Text("${currencyFormatter.format(item.price)}/hora"),
+                              Text(
+                                  "${currencyFormatter.format(item.price)}/hora"),
                               const Icon(Icons.arrow_right),
                             ],
                           ),
