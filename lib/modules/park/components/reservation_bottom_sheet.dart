@@ -7,12 +7,12 @@ import 'package:vagalivre/modules/park/cubit/reservation_cubit.dart';
 import 'package:vagalivre/utils/toast_message.dart';
 
 import '../../../utils/formatters.dart';
-import '../components/hour_selection_chip.dart';
+import 'hour_selection_chip.dart';
 import '../cubit/reservation_state';
 import '../enums/payment_method.dart';
 import '../../home/models/park_result.dart';
 import '../services/park_slots_service.dart';
-import '../components/reservation_section.dart';
+import 'reservation_section.dart';
 
 class ReservationBottomSheet extends StatefulWidget {
   const ReservationBottomSheet({super.key, required this.park});

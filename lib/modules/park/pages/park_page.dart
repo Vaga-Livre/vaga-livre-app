@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../utils/formatters.dart';
 import '../../home/models/park_result.dart';
-import 'reservation_bottom_sheet.dart';
+import '../components/reservation_bottom_sheet.dart';
 
 class ParkPage extends StatelessWidget {
   const ParkPage({super.key, required this.park});
