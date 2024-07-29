@@ -1,3 +1,5 @@
+part of 'reservation_cubit.dart';
+
 abstract class ReservationState {}
 
 class InitialReservationState extends ReservationState {}

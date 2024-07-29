@@ -1,9 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
+import 'package:objectbox/objectbox.dart';
 
 import 'package:http/http.dart';
-import 'package:vagalivre/objectbox.g.dart';
+import '../objectbox.g.dart';
 
 class CachedHttpClient {
   final Client _client;
@@ -11,13 +12,11 @@ class CachedHttpClient {
 
   CachedHttpClient(this._client, this._objBoxStore);
 
-  Future<Response> get(Uri uri,
-      {Map<String, String> headers = const {}}) async {
+  Future<Response> get(Uri uri, {Map<String, String> headers = const {}}) async {
     return send(Request("GET", uri)..headers.addAll(headers), true);
   }
 
-  Future<Response> post(Uri uri,
-      {Map<String, String> headers = const {}, Object? body}) async {
+  Future<Response> post(Uri uri, {Map<String, String> headers = const {}, Object? body}) async {
     final request = Request("POST", uri);
 
     request.headers.addAll(headers);
@@ -38,15 +37,14 @@ class CachedHttpClient {
   Future<Response> send(Request request, bool useCache) async {
     final box = _objBoxStore.box<CachedHttpResponse>();
     final cacheQuery = box
-        .query(CachedHttpResponse_.url
-            .equals("${request.url.toString()} + ${request.body.hashCode}"))
+        .query(
+            CachedHttpResponse_.url.equals("${request.url.toString()} + ${request.body.hashCode}"))
         .build();
 
     final cachedResponse = cacheQuery.findUnique();
     if (cachedResponse != null) {
       final cacheExpired =
-          cachedResponse.cachedAt.difference(DateTime.timestamp()) >
-              const Duration(days: 2);
+          cachedResponse.cachedAt.difference(DateTime.timestamp()) > const Duration(days: 2);
 
       if (cacheExpired) {
         cacheQuery.remove();
