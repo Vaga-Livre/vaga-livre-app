@@ -1,23 +1,25 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-import '../../../utils/formatters.dart';
+import '../../../utils/widgets_utils.dart';
 import '../../park/services/park_slots_service.dart';
 import '../controllers/reservations_list_controller.dart';
 import '../models/reservation.dart';
+import 'components/reservation_tile.dart';
 
 class ReservationPage extends StatefulWidget {
   const ReservationPage({super.key});
+
+  static const maxWidth = 640.0;
 
   @override
   State<ReservationPage> createState() => _ReservationPageState();
 }
 
 class _ReservationPageState extends State<ReservationPage> {
-  static final dateFormatter = DateFormat.yMd();
-  static final shortHourFormat = DateFormat.Hm();
+  final dateFormatter = DateFormat.yMd("pt-br");
+  final shortHourFormat = DateFormat.Hm();
 
   @override
   Widget build(BuildContext context) {
@@ -71,96 +73,26 @@ class _ReservationPageState extends State<ReservationPage> {
                     child: RefreshProgressIndicator(),
                   )
                 : ListView.separated(
+                    padding: EdgeInsetsExtension.maxWidth(
+                        width: MediaQuery.sizeOf(context).width,
+                        maxWidth: ReservationPage.maxWidth),
                     separatorBuilder: (context, index) => const Divider(height: 0),
                     itemCount: reservations.length,
                     itemBuilder: (context, index) {
                       final reservation = reservations[index];
 
                       final status = ReservationStatus.fromInt(reservation.status);
-                      return InkWell(
-                        onTap: () => context.go("/reservation/${reservation.id}"),
-                        child: Column(
-                          children: [
-                            ListTile(
-                              isThreeLine: true,
-                              leading: const Icon(Icons.directions_car),
-                              contentPadding: edgeInsets,
-                              title: Text(reservation.park.name),
-                              subtitle: Text(reservation.park.address),
-                              trailing: ReservationStatusWidget(status: status),
-                            ),
-                            Padding(
-                              padding: edgeInsets + const EdgeInsets.symmetric(vertical: 6),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text("Data"),
-                                      Text(
-                                        style: Theme.of(context).textTheme.bodyLarge,
-                                        dateFormatter.format(reservation.date),
-                                      ),
-                                    ],
-                                  ),
-                                  Column(children: [
-                                    Text("Valor"),
-                                    Text(
-                                      style: Theme.of(context).textTheme.bodyLarge,
-                                      currencyFormatter.format(reservation.hourlyRate),
-                                    )
-                                  ]),
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.end,
-                                    children: [
-                                      Text("Duração"),
-                                      Text(
-                                        style: Theme.of(context).textTheme.bodyLarge,
-                                        shortHourFormat.format(
-                                          DateTime.fromMillisecondsSinceEpoch(
-                                            reservation.duration.inMilliseconds,
-                                            isUtc: true,
-                                          ),
-                                        ),
-                                      )
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            )
-                          ],
-                        ),
+                      return ReservationTile(
+                        reservation: reservation,
+                        edgeInsets: edgeInsets,
+                        status: status,
+                        dateFormatter: dateFormatter,
+                        shortHourFormat: shortHourFormat,
                       );
                     },
                   ),
           );
         }),
-      ),
-    );
-  }
-}
-
-class ReservationStatusWidget extends StatelessWidget {
-  const ReservationStatusWidget({
-    super.key,
-    required this.status,
-  });
-
-  final ReservationStatus status;
-
-  @override
-  Widget build(BuildContext context) {
-    return DefaultTextStyle.merge(
-      style: TextStyle(color: status.color),
-      child: IconTheme.merge(
-        data: IconThemeData(color: status.color),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          // TODO: change to payment status
-          children: [Icon(status.icon), const SizedBox.square(dimension: 4), Text(status.text)],
-        ),
       ),
     );
   }
