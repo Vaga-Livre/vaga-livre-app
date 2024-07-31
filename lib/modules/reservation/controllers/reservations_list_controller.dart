@@ -19,7 +19,6 @@ class ReservationsListController extends ChangeNotifier {
   Future<void> fetchReservations() async {
     _notifyLoading(true);
 
-    await Future.delayed(const Duration(seconds: 1));
     try {
       reservations = await _parkSlotsService.fetchReservations(user.id);
     } catch (e, st) {
