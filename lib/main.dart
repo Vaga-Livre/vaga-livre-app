@@ -2,20 +2,13 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_map_animations/flutter_map_animations.dart';
-import 'package:go_router/go_router.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_auth_ui/supabase_auth_ui.dart';
 
-import 'modules/auth/pages/login_page.dart';
-import 'modules/auth/pages/register_user_info_page.dart';
-import 'modules/auth/pages/splash_page.dart';
 import 'modules/home/controllers/map_controller.dart';
 import 'modules/home/controllers/parks_search_controller.dart';
-import 'modules/home/pages/home_page.dart';
-import 'modules/home/pages/search_results_page.dart';
-import 'modules/home/models/park_result.dart';
-import 'modules/park/pages/park_page.dart';
+import 'routes/router.dart';
 import 'theme.dart';
 import 'utils/enviroment.dart';
 import 'utils/object_box.dart';
@@ -49,17 +42,14 @@ class _MyAppState extends State<MyApp> with TickerProviderStateMixin {
   void initState() {
     super.initState();
 
-    mapsController =
-        AnimatedMapController(vsync: this, duration: Durations.extralong2);
+    mapsController = AnimatedMapController(vsync: this, duration: Durations.extralong2);
   }
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (context) =>
-          MyMapController(animatedMapsController: mapsController),
-      child:
-          ChangeNotifierProxyProvider<MyMapController, ParksSearchController>(
+      create: (context) => MyMapController(animatedMapsController: mapsController),
+      child: ChangeNotifierProxyProvider<MyMapController, ParksSearchController>(
         create: (context) => ParksSearchController(
           queryTextController: TextEditingController(text: ""),
           searchInputFocusNode: FocusNode(),
@@ -77,7 +67,7 @@ class _MyAppState extends State<MyApp> with TickerProviderStateMixin {
           );
         },
         child: MaterialApp.router(
-          routerConfig: _router,
+          routerConfig: router,
           title: 'Flutter Demo',
           debugShowCheckedModeBanner: false,
           theme: MaterialTheme(ThemeData.light().textTheme).light(),
@@ -86,48 +76,3 @@ class _MyAppState extends State<MyApp> with TickerProviderStateMixin {
     );
   }
 }
-
-final _router = GoRouter(initialLocation: "/splash", routes: [
-  GoRoute(
-    path: "/",
-    name: "home",
-    builder: (_, __) => const HomePage(),
-    routes: [
-      GoRoute(
-        path: "search-results",
-        builder: (_, __) => const SearchResultsPage(),
-      )
-    ],
-  ),
-  GoRoute(
-      path: "/user/history",
-      name: "history",
-      builder: (_, state) => Container()),
-  GoRoute(
-      path: "/park",
-      builder: (_, state) => ParkPage(
-            park: state.extra as ParkResult,
-          )),
-  GoRoute(
-      path: "/login",
-      builder: (_, __) => const LoginPage(),
-      pageBuilder: (context, state) => CustomTransitionPage(
-            child: const LoginPage(),
-            transitionDuration: Durations.medium4,
-            reverseTransitionDuration: Durations.medium4,
-            transitionsBuilder:
-                (context, animation, secondaryAnimation, child) {
-              const begin = Offset(0.0, 0.8);
-              const end = Offset.zero;
-              final tween = Tween(begin: begin, end: end);
-              final offsetAnimation = animation.drive(tween);
-
-              return SlideTransition(
-                position: offsetAnimation,
-                child: child,
-              );
-            },
-          )),
-  GoRoute(path: "/user-info", builder: (_, __) => const RegisterUserInfoPage()),
-  GoRoute(path: "/splash", builder: (_, __) => const SplashPage()),
-]);
