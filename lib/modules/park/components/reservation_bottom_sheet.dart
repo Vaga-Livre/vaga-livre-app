@@ -2,13 +2,13 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:vagalivre/modules/park/cubit/reservation_cubit.dart';
 import 'package:vagalivre/utils/toast_message.dart';
 
 import '../../../utils/formatters.dart';
 import 'hour_selection_chip.dart';
-import '../cubit/reservation_state';
 import '../enums/payment_method.dart';
 import '../../home/models/park_result.dart';
 import '../services/park_slots_service.dart';
@@ -50,15 +50,12 @@ class _ReservationBottomSheetState extends State<ReservationBottomSheet> {
 
   void calculatePrice() {
     final now = DateTime.now();
-    final begin = DateTime(
-        now.year, now.month, now.day, beginTime.hour, beginTime.minute);
-    final end =
-        DateTime(now.year, now.month, now.day, endTime.hour, endTime.minute);
+    final begin = DateTime(now.year, now.month, now.day, beginTime.hour, beginTime.minute);
+    final end = DateTime(now.year, now.month, now.day, endTime.hour, endTime.minute);
 
     duration = end.difference(begin);
 
-    totalPrice =
-        (duration!.inMinutes / TimeOfDay.minutesPerHour) * widget.park.price;
+    totalPrice = (duration!.inMinutes / TimeOfDay.minutesPerHour) * widget.park.price;
   }
 
   @override
@@ -67,8 +64,8 @@ class _ReservationBottomSheetState extends State<ReservationBottomSheet> {
     final textTheme = theme.textTheme;
 
     return BlocProvider(
-      create: (context) => ReservationCubit(
-          ParkSlotsService()), // Supondo que você injete o serviço aqui
+      create: (context) =>
+          ReservationCubit(ParkSlotsService()), // Supondo que você injete o serviço aqui
       child: BlocListener<ReservationCubit, ReservationState>(
         listener: (context, state) {
           if (state is ReservationLoadingState) {
@@ -83,15 +80,10 @@ class _ReservationBottomSheetState extends State<ReservationBottomSheet> {
               },
             );
           } else if (state is ReservationConfirmedState) {
-            Navigator.of(context)
-              ..pop()
-              ..pop()
-              ..pop();
+            context.go('/');
             toastMessage.showSucess("Reserva realizada com sucesso!");
           } else if (state is ReservationFailedState) {
-            Navigator.of(context)
-              ..pop()
-              ..pop();
+            context.go('/');
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(state.message)),
             );
@@ -114,8 +106,7 @@ class _ReservationBottomSheetState extends State<ReservationBottomSheet> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Text("Reservar Vaga",
-                        style: textTheme.titleLarge
-                            ?.copyWith(fontWeight: FontWeight.w500)),
+                        style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w500)),
                   ),
                   ReservationSection(
                     title: const Text("Cheque o horário"),
@@ -159,9 +150,7 @@ class _ReservationBottomSheetState extends State<ReservationBottomSheet> {
                             ),
                           ],
                         ),
-                        Divider(
-                            height: 4,
-                            color: theme.colorScheme.onInverseSurface),
+                        Divider(height: 4, color: theme.colorScheme.onInverseSurface),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -215,14 +204,12 @@ class _ReservationBottomSheetState extends State<ReservationBottomSheet> {
                       title: const Text("Método de pagamento"),
                       child: ListTileTheme(
                         data: const ListTileThemeData(
-                            visualDensity:
-                                VisualDensity(vertical: -4, horizontal: -4)),
+                            visualDensity: VisualDensity(vertical: -4, horizontal: -4)),
                         child: FormField<PaymentMethod>(builder: (state) {
                           paymentMethodChanged(PaymentMethod? value) {
                             setState(() {
                               state.didChange(value);
-                              paymentMethod =
-                                  value ?? PaymentMethod.values.first;
+                              paymentMethod = value ?? PaymentMethod.values.first;
                             });
                           }
 
@@ -306,14 +293,14 @@ class _ReservationBottomSheetState extends State<ReservationBottomSheet> {
                             children: [
                               Text(
                                 "Total:",
-                                style: textTheme.titleMedium!.copyWith(
-                                    fontSize: 18, fontWeight: FontWeight.w500),
+                                style: textTheme.titleMedium!
+                                    .copyWith(fontSize: 18, fontWeight: FontWeight.w500),
                               ),
                               const SizedBox.square(dimension: 8),
                               Text(
                                 currencyFormatter.format(totalPrice ?? 0),
-                                style: textTheme.titleMedium!.copyWith(
-                                    fontSize: 18, fontWeight: FontWeight.w500),
+                                style: textTheme.titleMedium!
+                                    .copyWith(fontSize: 18, fontWeight: FontWeight.w500),
                               ),
                             ],
                           ),
@@ -328,11 +315,9 @@ class _ReservationBottomSheetState extends State<ReservationBottomSheet> {
                       child: FilledButton(
                         onPressed: totalPrice != null
                             ? () {
-                                context.read<ReservationCubit>().reserveSlot(
-                                    widget.park.id,
-                                    beginTime,
-                                    endTime,
-                                    paymentMethod);
+                                context
+                                    .read<ReservationCubit>()
+                                    .reserveSlot(widget.park.id, beginTime, endTime, paymentMethod);
                               }
                             : null,
                         child: const Text("Reservar Vaga"),
