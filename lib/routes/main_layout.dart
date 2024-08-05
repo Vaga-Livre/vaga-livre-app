@@ -23,7 +23,7 @@ class _MainLayoutState extends State<MainLayout> {
   void initState() {
     super.initState();
     pageController = PageController(initialPage: 0);
-
+    _navigationIndex = widget.initialTabIndex ?? 0;
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       setupPage();
     });
