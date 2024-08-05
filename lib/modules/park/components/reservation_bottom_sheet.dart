@@ -84,9 +84,7 @@ class _ReservationBottomSheetState extends State<ReservationBottomSheet> {
             toastMessage.showSucess("Reserva realizada com sucesso!");
           } else if (state is ReservationFailedState) {
             context.go('/');
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message)),
-            );
+            toastMessage.showFailure(state.message);
           }
         },
         child: Builder(
