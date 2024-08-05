@@ -1,5 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:vagalivre/modules/park/services/park_slots_service.dart';
 
 import '../enums/payment_method.dart';
@@ -21,8 +22,10 @@ class ReservationCubit extends Cubit<ReservationState> {
     try {
       await _parkSlotsService.reserveSlot(parkId, beginTime, endTime, paymentMethod);
       emit(ReservationConfirmedState());
+    } on PostgrestException catch(e) {
+      emit(ReservationFailedState(message: "Erro no banco de dados: ${e.message}"));
     } catch (e) {
-      emit(ReservationFailedState(message: e.toString()));
+      emit(ReservationFailedState(message: "Ocorreu um erro inesperado! Por favor, entre em contato com o time de suporte."));
     }
   }
 }
