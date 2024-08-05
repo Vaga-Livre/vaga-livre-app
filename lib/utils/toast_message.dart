@@ -57,7 +57,7 @@ class ToastMessage {
     fToast.showToast(
       child: toast,
       gravity: ToastGravity.BOTTOM,
-      toastDuration: const Duration(seconds: 2),
+      toastDuration: const Duration(seconds: 10),
     );
   }
 }
