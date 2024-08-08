@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../controllers/parks_search_controller.dart';
+import '../../../models/park_result.dart';
 
 class ParkMarker extends StatelessWidget {
   const ParkMarker({
@@ -22,7 +22,9 @@ class ParkMarker extends StatelessWidget {
       padding: EdgeInsets.zero,
       visualDensity: VisualDensity.compact,
       onPressed: () => onPressed(park),
-      color: selected ? theme.colorScheme.onPrimary : theme.colorScheme.onPrimary.withOpacity(0.87),
+      color: selected
+          ? theme.colorScheme.onPrimary
+          : theme.colorScheme.onPrimary.withOpacity(0.87),
       icon: Icon(
         Icons.directions_car_outlined,
         size: 20,

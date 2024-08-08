@@ -5,8 +5,10 @@ import 'package:flutter_map_animations/flutter_map_animations.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 import 'package:latlong2/latlong.dart';
 
+import '../../models/park_result.dart';
 import '../../controllers/map_controller.dart';
 import '../../controllers/parks_search_controller.dart';
+import '../../models/destination_result.dart';
 import 'components/destination_marker.dart';
 import 'components/park_details.dart';
 import 'components/park_marker.dart';
@@ -22,7 +24,8 @@ class MapWidget extends StatelessWidget {
       builder: (context, state) {
         final List<AnimatedMarker> markers;
 
-        markerBuilder(DestinationResult result, {required ParkResult? selectedPark}) {
+        markerBuilder(DestinationResult result,
+            {required ParkResult? selectedPark}) {
           return destinationToMarker(result, searchController, selectedPark);
         }
 
@@ -34,7 +37,10 @@ class MapWidget extends StatelessWidget {
           case MapViewParksResults(:final parksNearby):
             results = [...parksNearby];
             break;
-          case ParksNearbyDestinationResults(:final parksNearby, :final destination):
+          case ParksNearbyDestinationResults(
+              :final parksNearby,
+              :final destination
+            ):
             results = [...parksNearby, destination];
             break;
           case DestinationsSearchResults(:final destinations):
@@ -42,24 +48,29 @@ class MapWidget extends StatelessWidget {
             break;
         }
 
-        final selectedPark = state is ParksNearbyDestinationResults ? state.selectedPark : null;
+        final selectedPark =
+            state is ParksNearbyDestinationResults ? state.selectedPark : null;
 
-        final selectedParkDetails =
-            selectedPark != null ? ParkDetailsAnimatedMarker(selectedPark) : null;
+        final selectedParkDetails = selectedPark != null
+            ? ParkDetailsAnimatedMarker(selectedPark)
+            : null;
 
-        markers = List.of(results.map((e) => markerBuilder(e, selectedPark: selectedPark)));
+        markers = List.of(
+            results.map((e) => markerBuilder(e, selectedPark: selectedPark)));
 
         return FlutterMap(
           mapController: myMapController.animatedMapsController.mapController,
           options: MapOptions(
             maxZoom: 19,
             initialZoom: 4,
-            onTap: (tapPosition, point) => onMapTap(selectedParkDetails, searchController),
+            onTap: (tapPosition, point) =>
+                onMapTap(selectedParkDetails, searchController),
             onLongPress: (TapPosition tapPosition, point) =>
                 onMapLongPress(context, tapPosition, searchController, point),
             initialCenter: myMapController.userLatitude == 0
                 ? const LatLng(-14.235004, -51.92528)
-                : LatLng(myMapController.userLatitude, myMapController.userLongitude),
+                : LatLng(myMapController.userLatitude,
+                    myMapController.userLongitude),
           ),
           children: [
             TileLayer(
@@ -76,7 +87,10 @@ class MapWidget extends StatelessWidget {
               ),
             ),
             AnimatedMarkerLayer(
-              markers: [...markers, if (selectedParkDetails != null) selectedParkDetails],
+              markers: [
+                ...markers,
+                if (selectedParkDetails != null) selectedParkDetails
+              ],
               rotate: true,
               alignment: Alignment.center,
             ),
@@ -93,8 +107,8 @@ class MapWidget extends StatelessWidget {
     );
   }
 
-  AnimatedMarker destinationToMarker(
-      DestinationResult result, ParksSearchController searchController, ParkResult? selectedPark) {
+  AnimatedMarker destinationToMarker(DestinationResult result,
+      ParksSearchController searchController, ParkResult? selectedPark) {
     return AnimatedMarker(
       width: 48,
       height: 64,
@@ -104,7 +118,8 @@ class MapWidget extends StatelessWidget {
         return result is ParkResult
             ? ParkMarker(
                 park: result,
-                onPressed: (result) => searchController.selectPark(result),
+                onPressed: (result) =>
+                    searchController.selectPark(result as ParkResult?),
                 selected: selectedPark == result,
               )
             : DestinationMarker(
@@ -115,7 +130,8 @@ class MapWidget extends StatelessWidget {
     );
   }
 
-  void onMapTap(AnimatedMarker? selectedParkDetails, ParksSearchController searchController) {
+  void onMapTap(AnimatedMarker? selectedParkDetails,
+      ParksSearchController searchController) {
     if (selectedParkDetails != null) {
       searchController.selectPark(null);
     }

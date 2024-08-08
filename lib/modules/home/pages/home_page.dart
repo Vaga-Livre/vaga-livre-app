@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
-import '../../../config/extension.dart';
 import '../components/bottom_sheet/app_bottom_sheet.dart';
 import '../components/map/map_widget.dart';
 import '../components/search_bar.dart';
@@ -13,6 +11,7 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      primary: false,
       body: const SafeArea(
         child: Stack(
           alignment: Alignment.topCenter,
@@ -29,55 +28,6 @@ class HomePage extends StatelessWidget {
         enableDrag: false,
         clipBehavior: Clip.antiAlias,
         builder: (context) => const AppBottomSheet(),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          context.go("/reservas");
-        },
-        child: const Icon(Icons.add),
-      ),
-      bottomNavigationBar: NavigationBar(
-        elevation: 0,
-        onDestinationSelected: (value) async {
-          switch (value) {
-            case 2:
-              showAdaptiveDialog(
-                context: context,
-                builder: (context) => AlertDialog.adaptive(
-                  title: const Text("Deseja Sair?"),
-                  content: const Text("Tem certeza que deseja sair?"),
-                  actions: [
-                    TextButton(
-                      onPressed: () => context.pop(),
-                      child: const Text('cancelar'),
-                    ),
-                    TextButton(
-                      style: TextButton.styleFrom(foregroundColor: context.colorScheme.error),
-                      onPressed: () => context.go("/login"),
-                      child: const Text('Sair mesmo assim'),
-                    ),
-                  ],
-                ),
-              );
-              break;
-            default:
-              break;
-          }
-        },
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.directions_car),
-            label: "Explorar",
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.access_time),
-            label: "Reservas",
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.logout),
-            label: "Sair",
-          ),
-        ],
       ),
     );
   }

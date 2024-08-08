@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../config/extension.dart';
 import '../controllers/parks_search_controller.dart';
+import '../models/destination_result.dart';
 
 class AppSearchBar extends StatefulWidget {
   const AppSearchBar({super.key});
@@ -25,11 +26,12 @@ class _AppSearchBarState extends State<AppSearchBar> {
       child: BlocBuilder<ParksSearchController, ParkSearchState>(
         bloc: searchController,
         builder: (context, state) {
-          final showLeadingIcon =
-              isSearching || (state is! MapViewParksResults && state is! LoadingResults);
+          final showLeadingIcon = isSearching ||
+              (state is! MapViewParksResults && state is! LoadingResults);
           final hasSuggestions = isSearching &&
               (state is DestinationsSearchResults &&
-                  (state.destinations.isNotEmpty || state.suggestedParks.isNotEmpty));
+                  (state.destinations.isNotEmpty ||
+                      state.suggestedParks.isNotEmpty));
 
           return Column(
             children: [
@@ -39,7 +41,9 @@ class _AppSearchBarState extends State<AppSearchBar> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.vertical(
                     top: const Radius.circular(28),
-                    bottom: hasSuggestions ? Radius.zero : const Radius.circular(28),
+                    bottom: hasSuggestions
+                        ? Radius.zero
+                        : const Radius.circular(28),
                   ),
                 ),
                 leading: showLeadingIcon
@@ -59,7 +63,9 @@ class _AppSearchBarState extends State<AppSearchBar> {
                 ),
                 actions: [
                   IconButton(
-                    icon: isSearching ? const Icon(Icons.close) : const Icon(Icons.search),
+                    icon: isSearching
+                        ? const Icon(Icons.close)
+                        : const Icon(Icons.search),
                     onPressed: searchController.startSearching,
                   ),
                   const SizedBox.square(dimension: 8),
@@ -85,15 +91,18 @@ class _AppSearchBarState extends State<AppSearchBar> {
                         children: <Widget>[
                           if (state.suggestedParks.isNotEmpty)
                             Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                              child: Text("Estacionamentos", style: context.textTheme.titleMedium),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 4),
+                              child: Text("Estacionamentos",
+                                  style: context.textTheme.titleMedium),
                             ),
                           ...state.suggestedParks.map(
                             (suggestion) {
                               return ListTile(
                                 // dense: true,
                                 leading: CircleAvatar(
-                                  backgroundColor: colorScheme.surfaceContainerHighest,
+                                  backgroundColor:
+                                      colorScheme.surfaceContainerHighest,
                                   foregroundColor: colorScheme.onSurfaceVariant,
                                   child: const Text(
                                     "E",
@@ -119,15 +128,18 @@ class _AppSearchBarState extends State<AppSearchBar> {
                           const Divider(height: 0),
                           if (state.destinations.isNotEmpty)
                             Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                              child: Text("Destinos", style: context.textTheme.titleMedium),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 4),
+                              child: Text("Destinos",
+                                  style: context.textTheme.titleMedium),
                             ),
                           ...state.destinations.map(
                             (DestinationResult suggestion) {
                               return ListTile(
                                 // dense: true,
                                 leading: CircleAvatar(
-                                  backgroundColor: colorScheme.surfaceContainerHighest,
+                                  backgroundColor:
+                                      colorScheme.surfaceContainerHighest,
                                   foregroundColor: colorScheme.onSurfaceVariant,
                                   child: const Icon(Icons.location_on),
                                 ),
@@ -140,7 +152,8 @@ class _AppSearchBarState extends State<AppSearchBar> {
                                 trailing: const Icon(Icons.search),
 
                                 onTap: () {
-                                  searchController.searchParksCloseTo(suggestion);
+                                  searchController
+                                      .searchParksCloseTo(suggestion);
                                 },
                               );
                             },

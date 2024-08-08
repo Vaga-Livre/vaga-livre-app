@@ -18,3 +18,18 @@ extension Iterabled<E> on Iterable<E> {
     yield item;
   }
 }
+
+extension TimeOfDayMap on TimeOfDay {
+  /// Formats the time of day to a string in the format "HH:mm:00".
+  /// As TimeOfDay only tracks the hour and minutes, the seconds are always 00.
+  String toISOString() {
+    return "$hour:$minute:00";
+  }
+
+  // Parses a string in the format "HH:mm:00" into a TimeOfDay.
+  // [isoString] should be a valid ISO 8601 time string.
+  static TimeOfDay parseIso(String isoString) {
+    final parts = isoString.split(':');
+    return TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
+  }
+}

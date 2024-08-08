@@ -6,5 +6,6 @@
     "conventionalCommits.scopes": [
         "reservation",
         "map"
-    ]
+    ],
+    "dart.lineLength": 100
 }
